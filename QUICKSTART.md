@@ -1,119 +1,115 @@
-# Icon Grabber - Quick Start Guide
+Icon Grabber - Quick Start Guide
 
-## 🚀 Get Started in 30 Seconds
+## Get Started in Seconds
 ```bash
-# Build
+Build
 make build
 
-# Extract an icon
+Extract an icon
 ./bin/icongrabber /Applications/Safari.app
 
-# That's it! safari_512x512.png is created
+That's it! safari_x.png is created
 ```
 
-## 📝 Common Commands
+## Common Commands
 
-### CLI Quick Reference
+CLI Quick Reference
 
 ```bash
-# Basic extraction (512x512 PNG by default)
+Basic extraction (x PNG by default)
 icongrabber /Applications/Safari.app
 
-# Custom size
-icongrabber /Applications/Safari.app -s 256
-
-# Custom output location
+Custom size
+icongrabber /Applications/Safari.app -s 
+Custom output location
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 
-# All options
-icongrabber -i /Applications/Safari.app -o output.png -s 1024
-
-# Help
+All options
+icongrabber -i /Applications/Safari.app -o output.png -s 
+Help
 icongrabber --help
 ```
 
-### Build & Install
+Build & Install
 
 ```bash
-# Build the CLI tool
+Build the CLI tool
 make build
 
-# Install system-wide (requires sudo)
+Install system-wide (requires sudo)
 sudo make install
 
-# Install to home directory (no sudo needed)
+Install to home directory (no sudo needed)
 make install PREFIX=$HOME/.local
 
-# Run tests
+Run tests
 make test
 
-# Clean up
+Clean up
 make clean
 ```
 
-## 📝 Notes
+ Notes
 
-- macOS app icons are raster images (PNG/ICNS format)
+- mac OS app icons are raster images (PNG/ICNS format)
 - SVG export would require vectorization (not currently supported)
 - Paths with `~` are automatically expanded
-- Exit codes: 0 (success), 1 (error), 2 (invalid args), 3 (extraction failed)
+- Exit codes: (success), (error), (invalid args), (extraction failed)
 
-## 🎯 Use Cases
+## Use Cases
 
-### Web Developer
+Web Developer
 Extract app icons for your website or documentation:
 ```bash
-icongrabber /Applications/YourApp.app -o assets/app-icon.png -s 256
-```
+icongrabber /Applications/Your App.app -o assets/app-icon.png -s ```
 
-### Batch Processing
+Batch Processing
 Extract all app icons from /Applications:
 ```bash
 ./examples/batch_extract.sh
 ```
 
-### Multiple Sizes
+Multiple Sizes
 Get an icon in all common sizes:
 ```bash
 ./examples/extract_multiple_sizes.sh /Applications/Safari.app
 ```
 
-### Automation
+Automation
 Integrate into your build scripts:
 ```bash
-#!/bin/bash
-if icongrabber "$APP_PATH" -o "$OUTPUT" -s 512; then
-    echo "✓ Icon extracted"
-    # Do something with the icon
+!/bin/bash
+if icongrabber "$APP_PATH" -o "$OUTPUT" -s ; then
+ echo " Icon extracted"
+ Do something with the icon
 fi
 ```
 
-## 📁 Output Files
+## Output Files
 
-Default naming pattern: `AppName_512x512.png`
+Default naming pattern: `App Name_x.png`
 
 Examples:
-- Safari.app → `Safari_512x512.png`
-- Visual Studio Code.app → `Visual_Studio_Code_512x512.png`
-- Calculator.app → `Calculator_512x512.png`
+- Safari.app → `Safari_x.png`
+- Visual Studio Code.app → `Visual_Studio_Code_x.png`
+- Calculator.app → `Calculator_x.png`
 
-## ⚙️ Available Sizes
+ Available Sizes
 
-- 16×16 (Small)
-- 32×32 (Small)
-- 64×64 (Medium)
-- 128×128 (Medium)
-- 256×256 (Large)
-- **512×512 (Default)**
-- 1024×1024 (Extra Large)
+- ×(Small)
+- ×(Small)
+- ×(Medium)
+- ×(Medium)
+- ×(Large)
+- ×(Default)- ×(Extra Large)
 
-## 🆘 Need Help?
+ Need Help?
 
 ```bash
-# Show all options
+Show all options
 icongrabber --help
 
-# Show version
+Show version
 icongrabber --version
 ```
 

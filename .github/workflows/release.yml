@@ -1,0 +1,362 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  APP_NAME: icongrabber
+  BUNDLE_ID: com.kitzy.icongrabber
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Load secrets from 1Password
+      id: op-secrets
+      uses: 1password/load-secrets-action@v2
+      with:
+        export-env: false
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        APPLE_CERTIFICATE_BASE64: op://GitHub/IconGrabberSecrets/APPLE_CERTIFICATE_BASE64
+        APPLE_CERTIFICATE_PASSWORD: op://GitHub/IconGrabberSecrets/APPLE_CERTIFICATE_PASSWORD
+        APPLE_SIGNING_IDENTITY: op://GitHub/IconGrabberSecrets/APPLE_SIGNING_IDENTITY
+        APPLE_INSTALLER_SIGNING_IDENTITY: op://GitHub/IconGrabberSecrets/APPLE_INSTALLER_SIGNING_IDENTITY
+        APPLE_ID: op://GitHub/IconGrabberSecrets/APPLE_ID
+        APPLE_TEAM_ID: op://GitHub/IconGrabberSecrets/APPLE_TEAM_ID
+        APPLE_APP_PASSWORD: op://GitHub/IconGrabberSecrets/APPLE_APP_PASSWORD
+    
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+    
+    - name: Set up Swift
+      run: |
+        swift --version
+        xcodebuild -version
+    
+    - name: Build release binary
+      run: |
+        echo "Building optimized release binary..."
+        mkdir -p bin
+        swiftc -O -o bin/${{ env.APP_NAME }} icongrabber-cli/main.swift -framework AppKit
+        strip bin/${{ env.APP_NAME }}
+        
+        echo "Binary info:"
+        ls -lh bin/${{ env.APP_NAME }}
+        file bin/${{ env.APP_NAME }}
+        otool -L bin/${{ env.APP_NAME }}
+    
+    - name: Import Code Signing Certificate
+      if: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_BASE64 != '' }}
+      env:
+        APPLE_CERTIFICATE_BASE64: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_BASE64 }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_PASSWORD }}
+      run: |
+        # Create variables
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+        
+        # Import certificate from secrets
+        echo -n "$APPLE_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+        
+        # Create temporary keychain
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        
+        # Import certificate to keychain
+        security import $CERTIFICATE_PATH \
+          -P "$APPLE_CERTIFICATE_PASSWORD" \
+          -A \
+          -t cert \
+          -f pkcs12 \
+          -k $KEYCHAIN_PATH
+        
+        security list-keychain -d user -s $KEYCHAIN_PATH
+        security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        
+        echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
+        echo "Certificate imported successfully"
+    
+    - name: Sign binary
+      if: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_BASE64 != '' }}
+      env:
+        SIGNING_IDENTITY: ${{ steps.op-secrets.outputs.APPLE_SIGNING_IDENTITY }}
+      run: |
+        echo "Signing binary with identity: $SIGNING_IDENTITY"
+        
+        # Sign the binary
+        codesign --force \
+          --sign "$SIGNING_IDENTITY" \
+          --options runtime \
+          --timestamp \
+          --verbose \
+          bin/${{ env.APP_NAME }}
+        
+        # Verify signature
+        codesign --verify --verbose=4 bin/${{ env.APP_NAME }}
+        codesign --display --verbose=4 bin/${{ env.APP_NAME }}
+        
+        echo "✓ Binary signed successfully"
+    
+    - name: Create installation directory structure
+      run: |
+        mkdir -p pkgroot/usr/local/bin
+        mkdir -p pkgroot/usr/local/share/man/man1
+        mkdir -p scripts
+        
+        # Copy binary
+        cp bin/${{ env.APP_NAME }} pkgroot/usr/local/bin/
+        chmod 755 pkgroot/usr/local/bin/${{ env.APP_NAME }}
+        
+        # Copy man page if it exists
+        if [ -f icongrabber.1 ]; then
+          cp icongrabber.1 pkgroot/usr/local/share/man/man1/
+          chmod 644 pkgroot/usr/local/share/man/man1/icongrabber.1
+        fi
+        
+        echo "Package structure:"
+        find pkgroot -type f -ls
+    
+    - name: Create postinstall script
+      run: |
+        cat > scripts/postinstall << 'EOF'
+        #!/bin/bash
+        
+        # Ensure binary is executable
+        chmod 755 /usr/local/bin/icongrabber
+        
+        # Update man database if available
+        if command -v makewhatis >/dev/null 2>&1; then
+          makewhatis /usr/local/share/man 2>/dev/null || true
+        fi
+        
+        echo "Icon Grabber has been installed successfully!"
+        echo "Run 'icongrabber --help' to get started."
+        
+        exit 0
+        EOF
+        
+        chmod +x scripts/postinstall
+    
+    - name: Build unsigned PKG
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        # Build the component package
+        pkgbuild \
+          --root pkgroot \
+          --scripts scripts \
+          --identifier "${{ env.BUNDLE_ID }}" \
+          --version "$VERSION" \
+          --install-location / \
+          component.pkg
+        
+        # Create distribution XML
+        cat > distribution.xml << EOF
+        <?xml version="1.0" encoding="utf-8"?>
+        <installer-gui-script minSpecVersion="1">
+            <title>Icon Grabber</title>
+            <organization>${{ env.BUNDLE_ID }}</organization>
+            <domains enable_localSystem="true"/>
+            <options customize="never" require-scripts="false" rootVolumeOnly="true" />
+            <choices-outline>
+                <line choice="default">
+                    <line choice="${{ env.BUNDLE_ID }}"/>
+                </line>
+            </choices-outline>
+            <choice id="default"/>
+            <choice id="${{ env.BUNDLE_ID }}" visible="false">
+                <pkg-ref id="${{ env.BUNDLE_ID }}"/>
+            </choice>
+            <pkg-ref id="${{ env.BUNDLE_ID }}" version="$VERSION" onConclusion="none">component.pkg</pkg-ref>
+        </installer-gui-script>
+        EOF
+        
+        # Build the product archive (unsigned)
+        productbuild \
+          --distribution distribution.xml \
+          --package-path . \
+          ${{ env.APP_NAME }}-$VERSION-unsigned.pkg
+        
+        ls -lh ${{ env.APP_NAME }}-$VERSION-unsigned.pkg
+    
+    - name: Sign PKG
+      if: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_BASE64 != '' }}
+      env:
+        INSTALLER_SIGNING_IDENTITY: ${{ steps.op-secrets.outputs.APPLE_INSTALLER_SIGNING_IDENTITY }}
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        echo "Signing package with identity: $INSTALLER_SIGNING_IDENTITY"
+        
+        productsign \
+          --sign "$INSTALLER_SIGNING_IDENTITY" \
+          --timestamp \
+          ${{ env.APP_NAME }}-$VERSION-unsigned.pkg \
+          ${{ env.APP_NAME }}-$VERSION.pkg
+        
+        # Verify signature
+        pkgutil --check-signature ${{ env.APP_NAME }}-$VERSION.pkg
+        
+        # Remove unsigned package
+        rm ${{ env.APP_NAME }}-$VERSION-unsigned.pkg
+        
+        echo "✓ Package signed successfully"
+    
+    - name: Rename unsigned PKG
+      if: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_BASE64 == '' }}
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        mv ${{ env.APP_NAME }}-$VERSION-unsigned.pkg ${{ env.APP_NAME }}-$VERSION.pkg
+        echo "⚠️ Package is unsigned - users will need to bypass Gatekeeper"
+    
+    - name: Notarize PKG
+      if: ${{ steps.op-secrets.outputs.APPLE_CERTIFICATE_BASE64 != '' && steps.op-secrets.outputs.APPLE_ID != '' }}
+      env:
+        APPLE_ID: ${{ steps.op-secrets.outputs.APPLE_ID }}
+        APPLE_TEAM_ID: ${{ steps.op-secrets.outputs.APPLE_TEAM_ID }}
+        APPLE_APP_PASSWORD: ${{ steps.op-secrets.outputs.APPLE_APP_PASSWORD }}
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        PKG_PATH="${{ env.APP_NAME }}-$VERSION.pkg"
+        
+        echo "Submitting package for notarization..."
+        
+        # Submit for notarization
+        xcrun notarytool submit "$PKG_PATH" \
+          --apple-id "$APPLE_ID" \
+          --team-id "$APPLE_TEAM_ID" \
+          --password "$APPLE_APP_PASSWORD" \
+          --wait
+        
+        # Staple the notarization ticket
+        echo "Stapling notarization ticket..."
+        xcrun stapler staple "$PKG_PATH"
+        
+        # Verify stapling
+        xcrun stapler validate "$PKG_PATH"
+        
+        echo "✓ Package notarized and stapled successfully"
+    
+    - name: Create tarball with binary
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        # Create a tarball for users who prefer not to use PKG
+        mkdir -p ${{ env.APP_NAME }}-$VERSION-bin
+        cp bin/${{ env.APP_NAME }} ${{ env.APP_NAME }}-$VERSION-bin/
+        cp README.md ${{ env.APP_NAME }}-$VERSION-bin/ || true
+        cp LICENSE ${{ env.APP_NAME }}-$VERSION-bin/ || true
+        
+        tar -czf ${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz ${{ env.APP_NAME }}-$VERSION-bin/
+        
+        echo "Created tarball:"
+        ls -lh ${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz
+    
+    - name: Generate checksums
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        shasum -a 256 ${{ env.APP_NAME }}-$VERSION.pkg > checksums.txt
+        shasum -a 256 ${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz >> checksums.txt
+        
+        echo "Checksums:"
+        cat checksums.txt
+    
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        cat > release_notes.md << EOF
+        ## Icon Grabber v$VERSION
+        
+        ### Installation
+        
+        #### Option 1: Install via PKG (Recommended)
+        Download \`${{ env.APP_NAME }}-$VERSION.pkg\` and double-click to install.
+        
+        The PKG installer will:
+        - Install the binary to \`/usr/local/bin/icongrabber\`
+        - Install the man page to \`/usr/local/share/man/man1/\`
+        - No Gatekeeper issues - fully signed and notarized ✅
+        
+        #### Option 2: Manual Installation
+        Download \`${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz\`:
+        
+        \`\`\`bash
+        tar -xzf ${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz
+        sudo cp ${{ env.APP_NAME }}-$VERSION-bin/icongrabber /usr/local/bin/
+        \`\`\`
+        
+        ### Verification
+        
+        Verify the checksums:
+        \`\`\`bash
+        shasum -a 256 -c checksums.txt
+        \`\`\`
+        
+        ### Usage
+        
+        \`\`\`bash
+        icongrabber --help
+        icongrabber /Applications/Safari.app -o safari.png -s 512
+        \`\`\`
+        
+        ### What's Changed
+        
+        See [CHANGELOG.md](https://github.com/kitzy/icongrabber/blob/main/CHANGELOG.md) for details.
+        
+        ---
+        
+        **Checksums (SHA-256):**
+        \`\`\`
+        $(cat checksums.txt)
+        \`\`\`
+        EOF
+        
+        cat release_notes.md
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release v${{ steps.version.outputs.VERSION }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+        files: |
+          ${{ env.APP_NAME }}-${{ steps.version.outputs.VERSION }}.pkg
+          ${{ env.APP_NAME }}-${{ steps.version.outputs.VERSION }}-macos-binary.tar.gz
+          checksums.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Clean up keychain
+      if: always() && env.KEYCHAIN_PATH != ''
+      run: |
+        security delete-keychain $KEYCHAIN_PATH || true

@@ -50,7 +50,7 @@ sudo make install
 # Or install to your home directory (no sudo required)
 make build
 make install PREFIX=$HOME/.local
-export PATH="$HOME/.local/bin:$PATH"  # Add to ~/.zshrc
+export PATH="$HOME/.local/bin:$PATH" # Add to ~/.zshrc
 ```
 
 ## Quick Start
@@ -68,9 +68,9 @@ icongrabber /Applications/Safari.app -s 256
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 ```
 
-That's it!
+That's it! 
 
-## 📖 Usage
+## Usage
 
 ### Basic Usage
 
@@ -141,9 +141,9 @@ icongrabber /Applications/Safari.app -s 256 -o small-icon.png
 #!/bin/bash
 # Extract icon and use it in your workflow
 if icongrabber /Applications/MyApp.app -o assets/icon.png -s 512; then
-    echo "✓ Icon extracted successfully"
-    # Do something with the icon
-    convert assets/icon.png -resize 64x64 assets/icon-small.png
+ echo " Icon extracted successfully"
+ # Do something with the icon
+ convert assets/icon.png -resize 64x64 assets/icon-small.png
 fi
 ```
 
@@ -197,11 +197,11 @@ icongrabber /Applications/MyApp.app -o docs/images/app-icon.png -s 128
 Extract icons for mockups or prototypes:
 ```bash
 for app in /Applications/*.app; do
-    icongrabber "$app" -o "icons/$(basename "$app" .app).png" -s 512
+ icongrabber "$app" -o "icons/$(basename "$app" .app).png" -s 512
 done
 ```
 
-## Development
+##  Development
 
 ### Build from Source
 
@@ -242,10 +242,10 @@ make clean
 ### Continuous Integration
 
 The project uses GitHub Actions for automated testing:
-- ✅ Integration tests on every PR
-- ✅ Multi-version testing (macOS 15, latest)
-- ✅ Installation verification
-- ✅ Swift syntax checking
+- Integration tests on every PR
+- Multi-version testing (macOS 15, latest)
+- Installation verification
+- Swift syntax checking
 
 View the [CI workflow](.github/workflows/ci.yml) for details.
 
@@ -257,19 +257,19 @@ View the [CI workflow](.github/workflows/ci.yml) for details.
 
 ## FAQ
 
-**Q: What formats are supported?**  
+**Q: What formats are supported?** 
 A: Currently PNG format only. Icons are extracted at the highest quality available.
 
-**Q: What if an app doesn't have an icon?**  
+**Q: What if an app doesn't have an icon?** 
 A: The tool will exit with an error code and display an error message.
 
-**Q: Can I use this in my build scripts?**  
+**Q: Can I use this in my build scripts?** 
 A: Absolutely! The tool returns proper exit codes (0 for success, non-zero for errors) for easy integration.
 
-**Q: Does this work with paths containing spaces?**  
+**Q: Does this work with paths containing spaces?** 
 A: Yes! Just wrap the path in quotes: `icongrabber "/Applications/Visual Studio Code.app"`
 
-**Q: Can I use `~` in paths?**  
+**Q: Can I use `~` in paths?** 
 A: Yes, tilde expansion is supported: `icongrabber ~/Applications/MyApp.app`
 
 ## Contributing
@@ -283,7 +283,7 @@ Contributions are welcome! Feel free to:
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## For Maintainers
+##  For Maintainers
 
 ### Creating Releases
 
@@ -326,4 +326,4 @@ Built with Swift and AppKit for the macOS community.
 
 ---
 
-**Made with ❤️ for macOS administrators, developers and designers**
+**Made with  for macOS administrators, developers and designers**
