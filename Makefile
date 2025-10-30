@@ -65,7 +65,5 @@ release:
 	@./release.sh
 
 test: build
-	@echo "Testing Icon Grabber CLI..."
-	@./$(CLI_BINARY) /Applications/Safari.app -s 128 -o test_cli_output.png
-	@ls -lh test_cli_output.png
-	@echo "✓ Test complete"
+	@echo "Running Icon Grabber CLI tests..."
+	@./tests/run_tests.sh

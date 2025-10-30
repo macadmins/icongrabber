@@ -1,0 +1,115 @@
+name: CI Tests
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Swift
+      run: |
+        swift --version
+        xcodebuild -version
+    
+    - name: Build Icon Grabber
+      run: make build
+    
+    - name: Verify binary exists
+      run: |
+        ls -lh bin/icongrabber
+        file bin/icongrabber
+    
+    - name: Run integration tests
+      run: ./tests/run_tests.sh
+    
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-outputs
+        path: |
+          test_*.png
+          *_512x512.png
+        retention-days: 7
+        if-no-files-found: warn
+    
+    - name: Test help command
+      run: ./bin/icongrabber --help
+    
+    - name: Test version command
+      run: ./bin/icongrabber --version
+
+  build-test-multiple-versions:
+    name: Test on macOS ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-latest]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build
+      run: make build
+    
+    - name: Quick smoke test
+      run: |
+        ./bin/icongrabber /Applications/Safari.app -o test_safari.png -s 256
+        ls -lh test_safari.png
+        # Verify the file is a valid PNG
+        file test_safari.png | grep -q "PNG image data"
+
+  lint-and-format:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check Swift formatting
+      run: |
+        # Basic syntax check
+        swiftc -parse icongrabber-cli/main.swift
+    
+    - name: Verify project structure
+      run: |
+        test -f Makefile
+        test -f README.md
+        test -f LICENSE
+        test -f icongrabber-cli/main.swift
+        test -f tests/run_tests.sh
+        test -x tests/run_tests.sh
+
+  installation-test:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build and install to custom prefix
+      run: |
+        make build
+        make install PREFIX=$HOME/.local
+    
+    - name: Verify installation
+      run: |
+        test -f $HOME/.local/bin/icongrabber
+        test -x $HOME/.local/bin/icongrabber
+    
+    - name: Test installed binary
+      run: |
+        $HOME/.local/bin/icongrabber /Applications/Safari.app -o test.png -s 128
+        test -f test.png
+        ls -lh test.png

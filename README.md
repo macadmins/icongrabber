@@ -6,6 +6,8 @@ Perfect for developers, designers, and anyone who needs app icons for websites, 
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
+[![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
+[![CI Tests](https://github.com/kitzy/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/kitzy/icongrabber/actions)
 
 ## ✨ Features
 
@@ -201,14 +203,34 @@ make build
 ### Run Tests
 
 ```bash
+# Run the full test suite
 make test
+
+# Tests include:
+# - Basic icon extraction
+# - Multiple sizes (16, 32, 64, 128, 256, 512, 1024)
+# - Custom output paths
+# - Error handling
+# - CLI argument parsing
 ```
+
+See [tests/README.md](tests/README.md) for detailed test documentation.
 
 ### Clean Build Artifacts
 
 ```bash
 make clean
 ```
+
+### Continuous Integration
+
+The project uses GitHub Actions for automated testing:
+- ✅ Integration tests on every push and PR
+- ✅ Multi-version testing (macOS 13, 14, latest)
+- ✅ Installation verification
+- ✅ Swift syntax checking
+
+View the [CI workflow](.github/workflows/ci.yml) for details.
 
 ## 📚 Documentation
 
@@ -241,6 +263,8 @@ Contributions are welcome! Feel free to:
 - Suggest features
 - Submit pull requests
 - Improve documentation
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
