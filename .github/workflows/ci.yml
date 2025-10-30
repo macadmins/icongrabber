@@ -1,8 +1,6 @@
 name: CI Tests
 
 on:
-  push:
-    branches: [ main, development ]
   pull_request:
     branches: [ main, development ]
   workflow_dispatch:

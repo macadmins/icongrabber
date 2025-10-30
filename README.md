@@ -158,6 +158,12 @@ icongrabber /Applications/Safari.app -o my-custom-name.png
 
 ## 🎯 Use Cases
 
+### Mac Admins
+Extract app icons for your app catalogs
+```bash
+icongrabber /Applications/YourApp.app -o public/images/app-icon.png -s 256
+```
+
 ### Web Development
 Extract app icons for your website or documentation:
 ```bash
@@ -225,8 +231,8 @@ make clean
 ### Continuous Integration
 
 The project uses GitHub Actions for automated testing:
-- ✅ Integration tests on every push and PR
-- ✅ Multi-version testing (macOS 13, 14, latest)
+- ✅ Integration tests on every PR
+- ✅ Multi-version testing (macOS 15, latest)
 - ✅ Installation verification
 - ✅ Swift syntax checking
 
@@ -276,4 +282,4 @@ Built with Swift and AppKit for the macOS community.
 
 ---
 
-**Made with ❤️ for macOS developers and designers**
+**Made with ❤️ for macOS administrators, developers and designers**
