@@ -19,27 +19,38 @@ Perfect for developers, designers, and anyone who needs app icons for websites, 
 
 ## 📥 Installation
 
-### Quick Install (System-wide)
+### Download Release (Recommended)
+
+Download the latest signed and notarized installer from [Releases](https://github.com/kitzy/icongrabber/releases):
+
+```bash
+# Download the PKG installer
+curl -LO https://github.com/kitzy/icongrabber/releases/latest/download/icongrabber-1.0.0.pkg
+
+# Install (no Gatekeeper warnings!)
+sudo installer -pkg icongrabber-1.0.0.pkg -target /
+
+# Verify installation
+icongrabber --version
+```
+
+The PKG installer is fully signed and notarized - no security warnings!
+
+### Build from Source
 
 ```bash
 # Clone the repository
 git clone https://github.com/kitzy/icongrabber.git
 cd icongrabber
 
-# Build and install
+# Build and install system-wide
 make build
 sudo make install
-```
 
-### User Install (No sudo required)
-
-```bash
-# Install to your home directory
+# Or install to your home directory (no sudo required)
 make build
 make install PREFIX=$HOME/.local
-
-# Add to your PATH (add this to ~/.zshrc or ~/.bashrc)
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"  # Add to ~/.zshrc
 ```
 
 ## 🚀 Quick Start
@@ -271,6 +282,39 @@ Contributions are welcome! Feel free to:
 - Improve documentation
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 🏗️ For Maintainers
+
+### Creating Releases
+
+To create a new signed and notarized release:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The [release workflow](.github/workflows/release.yml) will automatically:
+- Build and sign the binary
+- Create a signed `.pkg` installer
+- Notarize with Apple (no Gatekeeper warnings!)
+- Create a GitHub release with all artifacts
+
+**Documentation:**
+- [Release Setup Guide](.github/RELEASE_SETUP.md) - Configure code signing (one-time)
+- [Creating Releases](.github/CREATING_RELEASES.md) - Release process
+- [Quick Reference](.github/QUICK_REFERENCE.md) - Command cheat sheet
+- [Workflow Architecture](.github/WORKFLOW_ARCHITECTURE.md) - Technical details
+
+### Setup Signing
+
+First-time setup to enable code signing and notarization:
+
+```bash
+./scripts/setup_signing.sh
+```
+
+This interactive script will guide you through exporting your Apple Developer certificates and configuring GitHub secrets.
 
 ## 📄 License
 
