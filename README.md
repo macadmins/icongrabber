@@ -141,9 +141,9 @@ icongrabber /Applications/Safari.app -s 256 -o small-icon.png
 #!/bin/bash
 # Extract icon and use it in your workflow
 if icongrabber /Applications/MyApp.app -o assets/icon.png -s 512; then
- echo " Icon extracted successfully"
- # Do something with the icon
- convert assets/icon.png -resize 64x64 assets/icon-small.png
+    echo "✓ Icon extracted successfully"
+    # Do something with the icon
+    convert assets/icon.png -resize 64x64 assets/icon-small.png
 fi
 ```
 
@@ -197,11 +197,11 @@ icongrabber /Applications/MyApp.app -o docs/images/app-icon.png -s 128
 Extract icons for mockups or prototypes:
 ```bash
 for app in /Applications/*.app; do
- icongrabber "$app" -o "icons/$(basename "$app" .app).png" -s 512
+    icongrabber "$app" -o "icons/$(basename "$app" .app).png" -s 512
 done
 ```
 
-##  Development
+## Development
 
 ### Build from Source
 
@@ -283,7 +283,7 @@ Contributions are welcome! Feel free to:
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-##  For Maintainers
+## For Maintainers
 
 ### Creating Releases
 
@@ -326,4 +326,4 @@ Built with Swift and AppKit for the macOS community.
 
 ---
 
-**Made with  for macOS administrators, developers and designers**
+**Made with ❤️ for macOS administrators, developers and designers**

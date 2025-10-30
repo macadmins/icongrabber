@@ -1,28 +1,28 @@
-Changelog
+# Changelog
 
 All notable changes to Icon Grabber will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/../),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v1.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]
+## [Unreleased]
 
-Added
+### Added
 - Automated release workflow with code signing and notarization
 - PKG installer for easy distribution
 
-[..] - YYYY-MM-DD
+## [1.0.0] - YYYY-MM-DD
 
-Added
+### Added
 - Initial release
-- Extract icons from mac OS applications
-- Support for custom sizes (xto x)
+- Extract icons from macOS applications
+- Support for custom sizes (16x16 to 1024x1024)
 - PNG output format
 - Command-line interface
 - Man page documentation
 - Batch processing examples
 
-Features
+### Features
 - Fast, native Swift implementation
 - No external dependencies
 - High-quality icon extraction
@@ -30,36 +30,37 @@ Features
 
 ---
 
-How to Update This Changelog
+## How to Update This Changelog
 
-When preparing a release, move items from [Unreleased]to a new version section.
+When preparing a release, move items from [Unreleased] to a new version section.
 
-Categories
+### Categories
 
-- Addedfor new features
-- Changedfor changes in existing functionality
-- Deprecatedfor soon-to-be removed features
-- Removedfor now removed features
-- Fixedfor any bug fixes
-- Securityfor vulnerability fixes
+- **Added** for new features
+- **Changed** for changes in existing functionality
+- **Deprecated** for soon-to-be removed features
+- **Removed** for now removed features
+- **Fixed** for any bug fixes
+- **Security** for vulnerability fixes
 
-Example Entry
+### Example Entry
 
 ```markdown
-[..] - --
-Added
+## [1.1.0] - 2024-01-15
+
+### Added
 - Support for ICNS file output format
 - `--format` flag to choose output format (png or icns)
 - Progress indicator for batch operations
 
-Fixed
+### Fixed
 - Crash when processing apps without icons
 - Incorrect aspect ratio for non-square icons
 
-Changed
+### Changed
 - Improved error messages
 - Faster icon extraction algorithm
 ```
 
 [Unreleased]: https://github.com/kitzy/icongrabber/compare/v1.0.0...HEAD
-[..]: https://github.com/kitzy/icongrabber/releases/tag/v1.0.0
+[1.0.0]: https://github.com/kitzy/icongrabber/releases/tag/v1.0.0

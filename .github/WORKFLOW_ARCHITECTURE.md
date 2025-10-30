@@ -1,318 +1,319 @@
-Release Workflow Architecture
+# Release Workflow Architecture
 
-Process Flow
+## Process Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ TRIGGER RELEASE │
-│ │
-│ Option : Push tag Option : Manual trigger │
-│ git tag v1.0.0Actions → Run workflow │
-│ git push origin v1.0.0Enter version number │
+│                       TRIGGER RELEASE                           │
+│                                                                 │
+│  Option 1: Push tag             Option 2: Manual trigger       │
+│  git tag v1.0.0                 Actions → Run workflow          │
+│  git push origin v1.0.0         Enter version number            │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ BUILD PHASE │
-│ │
-│ . Checkout code from repository │
-│ . Determine version number │
-│ . Compile Swift binary with optimizations │
-│ . Strip debug symbols │
-│ . Verify binary architecture │
+│                        BUILD PHASE                              │
+│                                                                 │
+│  1. Checkout code from repository                               │
+│  2. Determine version number                                    │
+│  3. Compile Swift binary with optimizations                     │
+│  4. Strip debug symbols                                         │
+│  5. Verify binary architecture                                  │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ SIGNING PHASE │
-│ (if secrets configured) │
-│ │
-│ . Import Pcertificate to temporary keychain │
-│ . Sign binary with Developer ID Application │
-│ - Runtime hardening enabled │
-│ - Secure timestamp added │
-│ . Verify code signature │
-│ . Display signing details │
+│                      SIGNING PHASE                              │
+│                  (if secrets configured)                        │
+│                                                                 │
+│  1. Import P12 certificate to temporary keychain                │
+│  2. Sign binary with Developer ID Application                   │
+│     - Runtime hardening enabled                                 │
+│     - Secure timestamp added                                    │
+│  3. Verify code signature                                       │
+│  4. Display signing details                                     │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ PACKAGE CREATION │
-│ │
-│ . Create package directory structure: │
-│ pkgroot/usr/local/bin/icongrabber │
-│ pkgroot/usr/local/share/man/man/icongrabber.│
-│ │
-│ . Create postinstall script │
-│ . Build component package │
-│ . Create distribution XML │
-│ . Build product archive (.pkg) │
+│                    PACKAGE CREATION                             │
+│                                                                 │
+│  1. Create package directory structure:                         │
+│     pkgroot/usr/local/bin/icongrabber                           │
+│     pkgroot/usr/local/share/man/man1/icongrabber.1              │
+│                                                                 │
+│  2. Create postinstall script                                   │
+│  3. Build component package                                     │
+│  4. Create distribution XML                                     │
+│  5. Build product archive (.pkg)                                │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ PKG SIGNING PHASE │
-│ (if secrets configured) │
-│ │
-│ . Sign PKG with Developer ID Installer │
-│ . Add secure timestamp │
-│ . Verify PKG signature │
-│ . Display certificate chain │
+│                    PKG SIGNING PHASE                            │
+│                  (if secrets configured)                        │
+│                                                                 │
+│  1. Sign PKG with Developer ID Installer                        │
+│  2. Add secure timestamp                                        │
+│  3. Verify PKG signature                                        │
+│  4. Display certificate chain                                   │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ NOTARIZATION PHASE │
-│ (if Apple ID credentials configured) │
-│ │
-│ . Submit PKG to Apple notarization service │
-│ . Wait for Apple to scan and approve (~-min) │
-│ . Staple notarization ticket to PKG │
-│ . Verify stapling successful │
-│ │
-│ Result: PKG trusted by Gatekeeper worldwide │
+│                   NOTARIZATION PHASE                            │
+│           (if Apple ID credentials configured)                  │
+│                                                                 │
+│  1. Submit PKG to Apple notarization service                    │
+│  2. Wait for Apple to scan and approve (~2-5 min)               │
+│  3. Staple notarization ticket to PKG                           │
+│  4. Verify stapling successful                                  │
+│                                                                 │
+│  Result: PKG trusted by Gatekeeper worldwide                    │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ DISTRIBUTION PREPARATION │
-│ │
-│ . Create binary tarball: │
-│ - Copy binary │
-│ - Include README, LICENSE │
-│ - Compress as .tar.gz │
-│ │
-│ . Generate SHA-checksums │
-│ . Create release notes │
-│ - Installation instructions │
-│ - Usage examples │
-│ - Changelog │
-│ - Checksums │
+│                 DISTRIBUTION PREPARATION                        │
+│                                                                 │
+│  1. Create binary tarball:                                      │
+│     - Copy binary                                               │
+│     - Include README, LICENSE                                   │
+│     - Compress as .tar.gz                                       │
+│                                                                 │
+│  2. Generate SHA-256 checksums                                  │
+│  3. Create release notes                                        │
+│     - Installation instructions                                 │
+│     - Usage examples                                            │
+│     - Changelog                                                 │
+│     - Checksums                                                 │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ GITHUB RELEASE │
-│ │
-│ Create release with: │
-│ │
-│ icongrabber-...pkg │
-│ - Signed with Developer ID │
-│ - Notarized by Apple │
-│ - Ready for distribution │
-│ │
-│ icongrabber-..-macos-binary.tar.gz │
-│ - For manual installation │
-│ - Includes documentation │
-│ │
-│ checksums.txt │
-│ - SHA-verification │
-│ │
-│ Release notes with full instructions │
+│                      GITHUB RELEASE                             │
+│                                                                 │
+│  Create release with:                                           │
+│                                                                 │
+│  📦 icongrabber-1.0.0.pkg                                       │
+│     - Signed with Developer ID                                  │
+│     - Notarized by Apple                                        │
+│     - Ready for distribution                                    │
+│                                                                 │
+│  📦 icongrabber-1.0.0-macos-binary.tar.gz                       │
+│     - For manual installation                                   │
+│     - Includes documentation                                    │
+│                                                                 │
+│  📄 checksums.txt                                               │
+│     - SHA-256 verification                                      │
+│                                                                 │
+│  Release notes with full instructions                           │
 └──────────────────────────┬───────────────────────────────────────┘
- │
- ▼
+                           │
+                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ CLEANUP │
-│ │
-│ . Delete temporary keychain │
-│ . Remove build artifacts │
-│ . Workflow complete │
+│                         CLEANUP                                 │
+│                                                                 │
+│  1. Delete temporary keychain                                   │
+│  2. Remove build artifacts                                      │
+│  3. Workflow complete ✓                                         │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Security Architecture
+## Security Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ GITHUB REPOSITORY │
-│ │
-│ Source Code (Public) Secrets (Encrypted) │
-│ ├── main.swift ├── APPLE_CERTIFICATE_BASE│
-│ ├── Makefile ├── APPLE_CERTIFICATE_PASSWORD │
-│ └── workflows/release.yml ├── APPLE_SIGNING_IDENTITY │
-│ ├── APPLE_INSTALLER_SIGNING... │
-│ ├── APPLE_ID │
-│ ├── APPLE_TEAM_ID │
-│ └── APPLE_APP_PASSWORD │
+│                      GITHUB REPOSITORY                       │
+│                                                              │
+│  Source Code (Public)          Secrets (Encrypted)          │
+│  ├── main.swift                ├── APPLE_CERTIFICATE_BASE64 │
+│  ├── Makefile                  ├── APPLE_CERTIFICATE_PASSWORD│
+│  └── workflows/release.yml     ├── APPLE_SIGNING_IDENTITY   │
+│                                ├── APPLE_INSTALLER_SIGNING...│
+│                                ├── APPLE_ID                  │
+│                                ├── APPLE_TEAM_ID             │
+│                                └── APPLE_APP_PASSWORD        │
 └────────────┬─────────────────────────┬──────────────────────────┘
- │ │
- │ │ (Decrypted only in runner)
- ▼ ▼
+             │                         │
+             │                         │ (Decrypted only in runner)
+             ▼                         ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ GITHUB ACTIONS RUNNER (mac OS) │
-│ │
-│ ┌────────────────────────────────────────────────────────┐ │
-│ │ TEMPORARY KEYCHAIN (Session only) │ │
-│ │ │ │
-│ │ ┌──────────────────────────────────────────────┐ │ │
-│ │ │ Developer ID Application Certificate │ │ │
-│ │ │ - Used to sign binary │ │ │
-│ │ │ - Enables runtime hardening │ │ │
-│ │ └──────────────────────────────────────────────┘ │ │
-│ │ │ │
-│ │ ┌──────────────────────────────────────────────┐ │ │
-│ │ │ Developer ID Installer Certificate │ │ │
-│ │ │ - Used to sign PKG │ │ │
-│ │ │ - Verifies package integrity │ │ │
-│ │ └──────────────────────────────────────────────┘ │ │
-│ │ │ │
-│ │ Auto-destroyed after workflow completes │ │
-│ └────────────────────────────────────────────────────────┘ │
-│ │
-│ Communicates with: │
-│ - Apple Notary Service (notarization) │
-│ - Apple Timestamp Server (secure timestamps) │
+│               GITHUB ACTIONS RUNNER (macOS)                     │
+│                                                                 │
+│  ┌────────────────────────────────────────────────────────┐   │
+│  │         TEMPORARY KEYCHAIN (Session only)              │   │
+│  │                                                        │   │
+│  │  ┌──────────────────────────────────────────────┐     │   │
+│  │  │  Developer ID Application Certificate        │     │   │
+│  │  │  - Used to sign binary                       │     │   │
+│  │  │  - Enables runtime hardening                 │     │   │
+│  │  └──────────────────────────────────────────────┘     │   │
+│  │                                                        │   │
+│  │  ┌──────────────────────────────────────────────┐     │   │
+│  │  │  Developer ID Installer Certificate          │     │   │
+│  │  │  - Used to sign PKG                          │     │   │
+│  │  │  - Verifies package integrity                │     │   │
+│  │  └──────────────────────────────────────────────┘     │   │
+│  │                                                        │   │
+│  │  Auto-destroyed after workflow completes              │   │
+│  └────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  Communicates with:                                             │
+│  - Apple Notary Service (notarization)                          │
+│  - Apple Timestamp Server (secure timestamps)                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Certificate Trust Chain
+## Certificate Trust Chain
 
 ```
 Apple Root CA
  │
  ├── Apple Worldwide Developer Relations CA
- │ │
- │ ├── Developer ID Application Certificate
- │ │ └── Signs: icongrabber binary
- │ │
- │ └── Developer ID Installer Certificate
- │ └── Signs: icongrabber-...pkg
+ │   │
+ │   ├── Developer ID Application Certificate
+ │   │   └── Signs: icongrabber binary
+ │   │
+ │   └── Developer ID Installer Certificate
+ │       └── Signs: icongrabber-1.0.0.pkg
  │
  └── Apple Notary Service
- └── Validates & Notarizes: icongrabber-...pkg
- │
- └── Stapled Ticket (embedded in PKG)
+     └── Validates & Notarizes: icongrabber-1.0.0.pkg
+         │
+         └── Stapled Ticket (embedded in PKG)
 
 End User's Mac
  │
  ├── Gatekeeper checks:
- │ . Valid signature from Developer ID
- │ . Notarization ticket present
- │ . Certificate not revoked
- │ . Code hasn't been tampered with
+ │   1. Valid signature from Developer ID
+ │   2. Notarization ticket present
+ │   3. Certificate not revoked
+ │   4. Code hasn't been tampered with
  │
- └── If all checks pass: Install without warnings 
+ └── If all checks pass: Install without warnings ✓
 ```
 
-Data Flow
+## Data Flow
 
 ```
-Developer's Machine GitHub Actions End User's Mac
-┌──────────────┐ ┌────────────┐ ┌──────────────┐
-│ │ │ │ │ │
-│ git tag │────────────────────▶│ Workflow │ │ │
-│ v1.0.0│ │ Triggered │ │ │
-│ │ │ │ │ │
-└──────────────┘ └─────┬──────┘ └──────────────┘
- │
- ▼
- ┌────────────┐
- │ Build │
- │ Binary │
- └─────┬──────┘
- │
- ▼
- ┌────────────┐
- │ Sign │
- │ Binary │
- └─────┬──────┘
- │
- ▼
- ┌────────────┐
- │ Create │
- │ PKG │
- └─────┬──────┘
- │
- ▼
- ┌────────────┐
- │ Sign │
- │ PKG │
- └─────┬──────┘
- │
- ▼
- ┌────────────┐ ┌──────────────┐
- │ Notarize │─────────────▶│ Apple │
- │ with │ │ Notary │
- │ Apple │◀─────────────│ Service │
- └─────┬──────┘ └──────────────┘
- │ Approval
- ▼
- ┌────────────┐
- │ Staple │
- │ Ticket │
- └─────┬──────┘
- │
- ▼
- ┌────────────┐
- │ GitHub │
- │ Release │
- └─────┬──────┘
- │
- │ Download
- ▼
- ┌──────────────┐
- │ Download │
- │ PKG │
- └──────┬───────┘
- │
- ▼
- ┌──────────────┐
- │ Gatekeeper │
- │ Verifies │
- └──────┬───────┘
- │
- ▼
- ┌──────────────┐
- │ Install │
- │ Success! │
- └──────────────┘
+Developer's Machine    GitHub Actions          End User's Mac
+┌──────────────┐       ┌────────────┐          ┌──────────────┐
+│              │       │            │          │              │
+│  git tag     │──────▶│  Workflow  │          │              │
+│  v1.0.0      │       │  Triggered │          │              │
+│              │       │            │          │              │
+└──────────────┘       └─────┬──────┘          └──────────────┘
+                             │
+                             ▼
+                       ┌────────────┐
+                       │   Build    │
+                       │   Binary   │
+                       └─────┬──────┘
+                             │
+                             ▼
+                       ┌────────────┐
+                       │    Sign    │
+                       │   Binary   │
+                       └─────┬──────┘
+                             │
+                             ▼
+                       ┌────────────┐
+                       │   Create   │
+                       │    PKG     │
+                       └─────┬──────┘
+                             │
+                             ▼
+                       ┌────────────┐
+                       │    Sign    │
+                       │    PKG     │
+                       └─────┬──────┘
+                             │
+                             ▼
+                       ┌────────────┐          ┌──────────────┐
+                       │  Notarize  │─────────▶│    Apple     │
+                       │    with    │          │   Notary     │
+                       │   Apple    │◀─────────│   Service    │
+                       └─────┬──────┘          └──────────────┘
+                             │                   Approval
+                             ▼
+                       ┌────────────┐
+                       │   Staple   │
+                       │   Ticket   │
+                       └─────┬──────┘
+                             │
+                             ▼
+                       ┌────────────┐
+                       │   GitHub   │
+                       │   Release  │
+                       └─────┬──────┘
+                             │
+                             │ Download
+                             ▼
+                                                ┌──────────────┐
+                                                │   Download   │
+                                                │     PKG      │
+                                                └──────┬───────┘
+                                                       │
+                                                       ▼
+                                                ┌──────────────┐
+                                                │  Gatekeeper  │
+                                                │   Verifies   │
+                                                └──────┬───────┘
+                                                       │
+                                                       ▼
+                                                ┌──────────────┐
+                                                │   Install    │
+                                                │   Success!   │
+                                                └──────────────┘
 ```
 
-File Structure After Release
+## File Structure After Release
 
 ```
 GitHub Release Page
-├── icongrabber-...pkg (signed & notarized)
-│ └── Contains:
-│ ├── usr/local/bin/icongrabber (signed binary)
-│ ├── usr/local/share/man/man/icongrabber.│ └── postinstall script
+├── icongrabber-1.0.0.pkg (signed & notarized)
+│   └── Contains:
+│       ├── usr/local/bin/icongrabber (signed binary)
+│       ├── usr/local/share/man/man1/icongrabber.1
+│       └── postinstall script
 │
-├── icongrabber-..-macos-binary.tar.gz
-│ └── Contains:
-│ ├── icongrabber (signed binary)
-│ ├── README.md
-│ └── LICENSE
+├── icongrabber-1.0.0-macos-binary.tar.gz
+│   └── Contains:
+│       ├── icongrabber (signed binary)
+│       ├── README.md
+│       └── LICENSE
 │
 └── checksums.txt
- └── SHA-hashes for verification
+    └── SHA-256 hashes for verification
 ```
 
-Conditional Execution Paths
+## Conditional Execution Paths
 
 ```
 Start Workflow
  │
  ├─── Secrets Configured? ───┐
- │ YES │ NO
- │ │ │
- │ ▼ ▼
- │ Sign Binary Skip Signing
- │ │ │
- │ ▼ │
- │ Sign PKG Skip PKG Signing
- │ │ │
- │ ▼ │
- │ Apple ID Set? ────┐ │
- │ YES NO │ │
- │ │ │ │ │
- │ ▼ │ │ │
- │ Notarize │ │ │
- │ │ │ │ │
- │ └─────┬───────┘ │ │
- │ │ │ │
- │ ▼ ▼ ▼
- │ Create Release (Signed & Notarized)
+ │         YES                │ NO
+ │          │                 │
+ │          ▼                 ▼
+ │    Sign Binary      Skip Signing
+ │          │                 │
+ │          ▼                 │
+ │      Sign PKG       Skip PKG Signing
+ │          │                 │
+ │          ▼                 │
+ │   Apple ID Set? ────┐      │
+ │         YES   NO    │      │
+ │          │     │    │      │
+ │          ▼     │    │      │
+ │      Notarize  │    │      │
+ │          │     │    │      │
+ │          └─────┬────┘      │
+ │                │           │
+ │                ▼           ▼
+ │         Create Release (Signed & Notarized)
  │
  └── Create Release (Unsigned)
 ```
@@ -320,8 +321,9 @@ Start Workflow
 ---
 
 This architecture ensures:
-- Secure handling of certificates
-- No secrets in code
-- Works with or without signing
-- Full Apple compliance
-- Zero Gatekeeper issues for users
+- ✓ Secure handling of certificates
+- ✓ No secrets in code
+- ✓ Works with or without signing
+- ✓ Full Apple compliance
+- ✓ Zero Gatekeeper issues for users
+

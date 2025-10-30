@@ -1,33 +1,34 @@
-GitHub Workflows & Documentation
+# GitHub Workflows & Documentation
 
 This directory contains GitHub Actions workflows and comprehensive documentation for building, testing, and releasing Icon Grabber.
 
 ## Quick Start
 
-For Users
+### For Users
 Download the latest signed release from [Releases](https://github.com/kitzy/icongrabber/releases).
 
-For Contributors
+### For Contributors
 See [CONTRIBUTING.md](../CONTRIBUTING.md) in the root directory.
 
-For Maintainers
+### For Maintainers
 To create a new release:
 ```bash
 git tag v1.0.0
-git push origin v1.0.0```
+git push origin v1.0.0
+```
 
 See [CREATING_RELEASES.md](CREATING_RELEASES.md) for details.
 
 ## Directory Contents
 
-Workflows
+### Workflows
 
 | File | Purpose |
 |------|---------|
 | [`workflows/ci.yml`](workflows/ci.yml) | Continuous Integration - runs tests on PRs |
 | [`workflows/release.yml`](workflows/release.yml) | Release automation - builds, signs, and releases |
 
-Documentation
+### Documentation
 
 | Document | What It Covers | When to Read |
 |----------|---------------|--------------|
@@ -41,192 +42,212 @@ Documentation
 
 ## Workflows Explained
 
-CI Workflow (`workflows/ci.yml`)
+### CI Workflow (`workflows/ci.yml`)
 
-Triggers: Pull requests to main, manual dispatch
+**Triggers:** Pull requests to main, manual dispatch
 
-What it does:
+**What it does:**
 - Builds the binary
 - Runs integration tests
-- Tests on multiple mac OS versions
+- Tests on multiple macOS versions
 - Validates project structure
 - Tests installation
 
-Purpose:Ensures code quality before merging
+**Purpose:** Ensures code quality before merging
 
-Release Workflow (`workflows/release.yml`)
+### Release Workflow (`workflows/release.yml`)
 
-Triggers:Version tags (`v1.0.0`), manual dispatch
+**Triggers:** Version tags (`v*.*.*`), manual dispatch
 
-What it does:. Builds optimized binary
-. Signs binary with Developer ID
-. Creates `.pkg` installer
-. Signs PKG with Developer ID
-. Notarizes with Apple
-. Staples notarization ticket
-. Creates GitHub release
-. Uploads signed artifacts
+**What it does:**
+1. Builds optimized binary
+2. Signs binary with Developer ID
+3. Creates `.pkg` installer
+4. Signs PKG with Developer ID
+5. Notarizes with Apple
+6. Staples notarization ticket
+7. Creates GitHub release
+8. Uploads signed artifacts
 
-Purpose:Automated, signed, production releases
+**Purpose:** Automated, signed, production releases
 
-Key Features:- Works with or without code signing
+**Key Features:**
+- Works with or without code signing
 - Comprehensive verification at each step
 - Detailed release notes
-- SHA-checksums
+- SHA-256 checksums
 - Professional `.pkg` installer
 
 ## Code Signing & Notarization
 
-Why Sign?
+### Why Sign?
 
-Without signing:
-- Users see "unidentified developer" warnings
-- Users must bypass Gatekeeper (right-click Open)
-- Apps may be blocked on newer mac OS versions
+**Without signing:**
+- ⚠️ Users see "unidentified developer" warnings
+- ⚠️ Users must bypass Gatekeeper (right-click → Open)
+- ⚠️ Apps may be blocked on newer macOS versions
 
-With signing + notarization:
-- Zero security warnings
-- Professional installer experience
-- Trusted worldwide
-- No Gatekeeper issues
+**With signing + notarization:**
+- ✅ Zero security warnings
+- ✅ Professional installer experience
+- ✅ Trusted worldwide
+- ✅ No Gatekeeper issues
 
-What You Need
+### What You Need
 
-. Apple Developer Account($/year)
-. Developer ID Application Certificate(signs binary)
-. Developer ID Installer Certificate(signs PKG)
-. App-Specific Password(for notarization)
-. Password Account(for secure secrets storage)
+1. **Apple Developer Account** ($99/year)
+2. **Developer ID Application Certificate** (signs binary)
+3. **Developer ID Installer Certificate** (signs PKG)
+4. **App-Specific Password** (for notarization)
+5. **1Password Account** (for secure secrets storage)
 
-Setup Process
+### Setup Process
 
-Step :Get certificates from [developer.apple.com](https://developer.apple.com/account)
+**Step 1:** Get certificates from [developer.apple.com](https://developer.apple.com/account)
 
-Step :Run the setup helper:
+**Step 2:** Run the setup helper:
 ```bash
 ./scripts/setup_signing.sh
 ```
 
-Step :Configure Password:
-- Create a vault named GitHub- Create an item named Icon Grabber Secrets- Add all fields shown by the setup script
-- Create a Password service account with vault access
+**Step 3:** Configure 1Password:
+- Create a vault named **GitHub**
+- Create an item named **IconGrabberSecrets**
+- Add all fields shown by the setup script
+- Create a 1Password service account with vault access
 
-Step :Add to GitHub:
+**Step 4:** Add to GitHub:
 - Add only `OP_SERVICE_ACCOUNT_TOKEN` to repository secrets
-- Settings Secrets and variables Actions New secret
+- Settings → Secrets and variables → Actions → New secret
 
-Step :Create a release - it will be automatically signed!
+**Step 5:** Create a release - it will be automatically signed!
 
 See [RELEASE_SETUP.md](RELEASE_SETUP.md) for detailed instructions.
 
 ## Release Process Flow
 
 ```
-Developer GitHub Actions End User
- 
- git tag v1.0.0 
- git push origin v1.0.0 
- > 
- 
- Build binary 
- Sign binary 
- Create PKG 
- Sign PKG 
- Notarize with Apple 
- Staple ticket 
- Create release 
- 
- >
- Download PKG 
- 
- Install
- (no warnings!)
+Developer                  GitHub Actions              End User
+    │                            │                        │
+    │  git tag v1.0.0           │                        │
+    │  git push origin v1.0.0   │                        │
+    ├───────────────────────────>│                        │
+    │                            │                        │
+    │                            │ Build binary          │
+    │                            │ Sign binary           │
+    │                            │ Create PKG            │
+    │                            │ Sign PKG              │
+    │                            │ Notarize with Apple   │
+    │                            │ Staple ticket         │
+    │                            │ Create release        │
+    │                            │                        │
+    │                            ├───────────────────────>│
+    │                            │   Download PKG        │
+    │                            │                        │
+    │                            │                   Install
+    │                            │                (no warnings!)
 ```
 
 ## For Maintainers
 
-First-Time Setup
+### First-Time Setup
 
-. Setup Code Signing(optional but recommended)
- ```bash
- ./scripts/setup_signing.sh
- ```
- Follow the prompts to export certificates and get field values.
+1. **Setup Code Signing** (optional but recommended)
+   ```bash
+   ./scripts/setup_signing.sh
+   ```
+   Follow the prompts to export certificates and get field values.
 
-. Configure Password - Create GitHubvault (if needed)
- - Create Icon Grabber Secretsitem
- - Add each field shown by the setup script
- - Create a service account with vault access
- - Copy the service account token
+2. **Configure 1Password**
+   - Create **GitHub** vault (if needed)
+   - Create **IconGrabberSecrets** item
+   - Add each field shown by the setup script
+   - Create a service account with vault access
+   - Copy the service account token
 
-. Add GitHub Secret - Go to repository Settings Secrets and variables Actions
- - Add `OP_SERVICE_ACCOUNT_TOKEN` with your service account token
+3. **Add GitHub Secret**
+   - Go to repository Settings → Secrets and variables → Actions
+   - Add `OP_SERVICE_ACCOUNT_TOKEN` with your service account token
 
-. Test the Workflow ```bash
- Create a test release
- git tag v1.0.0-test
- git push origin v1.0.0-test
- ```
- See [TESTING_RELEASES.md](TESTING_RELEASES.md) for comprehensive testing.
+4. **Test the Workflow**
+   ```bash
+   # Create a test release
+   git tag v0.0.1-test
+   git push origin v0.0.1-test
+   ```
+   See [TESTING_RELEASES.md](TESTING_RELEASES.md) for comprehensive testing.
 
-. Create Your First Production Release ```bash
- git tag v1.0.0 git push origin v1.0.0 ```
+5. **Create Your First Production Release**
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
 
-Regular Release Process
+### Regular Release Process
 
-. Update code and commit. Update CHANGELOG.md. Tag the release ```bash
- git tag v1.0.0 git push origin v1.0.0 ```
-. Wait for workflow to complete(~-minutes with notarization)
-. Download and test the release. Announce the release
-Manual Release Trigger
+1. **Update code and commit**
+2. **Update CHANGELOG.md**
+3. **Tag the release**
+   ```bash
+   git tag v1.1.0
+   git push origin v1.1.0
+   ```
+4. **Wait for workflow to complete** (~5-15 minutes with notarization)
+5. **Download and test the release**
+6. **Announce the release**
+
+### Manual Release Trigger
 
 Alternative to tagging:
 
-. Go to Actions Release. Click "Run workflow". Enter version (e.g., `..`)
-. Click "Run workflow"
+1. Go to **Actions** → **Release**
+2. Click **"Run workflow"**
+3. Enter version (e.g., `1.0.0`)
+4. Click **"Run workflow"**
 ## Troubleshooting
 
-Workflow Fails
+### Workflow Fails
 
-. Check Actions logs- Very detailed error messages
-. Common issues: - Signing: Certificate secrets not configured correctly
- - Notarization: Apple ID credentials invalid
- - Build: Swift code doesn't compile
+1. **Check Actions logs** - Very detailed error messages
+2. **Common issues:**
+   - Signing: Certificate secrets not configured correctly
+   - Notarization: Apple ID credentials invalid
+   - Build: Swift code doesn't compile
 
-Workflow Succeeds but PKG is Unsigned
+### Workflow Succeeds but PKG is Unsigned
 
-- Secrets are not configured in Password
+- Secrets are not configured in 1Password
 - Or service account doesn't have vault access
 - Workflow still completes successfully
 - Creates unsigned builds (users must bypass Gatekeeper)
 
-Notarization Takes Forever
+### Notarization Takes Forever
 
-- Normal: -minutes
-- If >minutes: Check Apple Developer account status
+- Normal: 2-10 minutes
+- If >15 minutes: Check Apple Developer account status
 - Try again: Sometimes Apple's servers are slow
 
-Users Report Gatekeeper Issues
+### Users Report Gatekeeper Issues
 
-. Verify PKG is signed: `pkgutil --check-signature file.pkg`
-. Verify notarization: `xcrun stapler validate file.pkg`
-. Check workflow logs for any skipped steps
+1. Verify PKG is signed: `pkgutil --check-signature file.pkg`
+2. Verify notarization: `xcrun stapler validate file.pkg`
+3. Check workflow logs for any skipped steps
 
 See detailed troubleshooting in [RELEASE_SETUP.md](RELEASE_SETUP.md).
 
 ## Additional Resources
 
-Apple Documentation
+### Apple Documentation
 - [Code Signing Guide](https://developer.apple.com/support/code-signing/)
-- [Notarizing mac OS Software](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution)
+- [Notarizing macOS Software](https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution)
 - [Developer ID Certificates](https://developer.apple.com/account/resources/certificates/list)
 
-GitHub Documentation
+### GitHub Documentation
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Encrypted Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 - [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github)
 
-Project Documentation
+### Project Documentation
 - [Main README](../README.md)
 - [Contributing Guide](../CONTRIBUTING.md)
 - [Changelog](../CHANGELOG.md)
@@ -234,12 +255,12 @@ Project Documentation
 
 ## Tips
 
-- Test without signing first- Simpler to debug
-- Use test tags- `v1.0.0-test` for testing
-- Monitor first release- Watch Actions tab closely
-- Keep certificates safe- Never commit Pfiles
-- Update changelog- Keep users informed
-- Verify releases- Always download and test
+- **Test without signing first** - Simpler to debug
+- **Use test tags** - `v0.0.1-test` for testing
+- **Monitor first release** - Watch Actions tab closely
+- **Keep certificates safe** - Never commit P12 files
+- **Update changelog** - Keep users informed
+- **Verify releases** - Always download and test
 
 ## Quick Links
 
