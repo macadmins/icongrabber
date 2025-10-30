@@ -1,4 +1,4 @@
-# 🎨 Icon Grabber
+# Icon Grabber
 
 **A fast, simple command-line tool to extract high-quality icons from macOS applications.**
 
@@ -9,15 +9,15 @@ Perfect for developers, designers, and anyone who needs app icons for websites, 
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
 [![CI Tests](https://github.com/kitzy/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/kitzy/icongrabber/actions)
 
-## ✨ Features
+## Features
 
-- 🚀 **Simple & Fast** - Extract icons with a single command
-- 🎯 **Flexible Sizing** - Get icons in any size from 16x16 to 1024x1024
-- 📦 **High Quality** - Preserves original icon quality in PNG format
-- 🛠️ **Scriptable** - Perfect for automation and batch processing
-- 💻 **Native** - Written in Swift, lightweight, no dependencies
+- **Simple & Fast** - Extract icons with a single command
+- **Flexible Sizing** - Get icons in any size from 16x16 to 1024x1024
+- **High Quality** - Preserves original icon quality in PNG format
+- **Scriptable** - Perfect for automation and batch processing
+- **Native** - Written in Swift, lightweight, no dependencies
 
-## 📥 Installation
+## Installation
 
 ### Download Release (Recommended)
 
@@ -53,7 +53,7 @@ make install PREFIX=$HOME/.local
 export PATH="$HOME/.local/bin:$PATH"  # Add to ~/.zshrc
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 Extract an icon in 30 seconds:
 
@@ -68,7 +68,7 @@ icongrabber /Applications/Safari.app -s 256
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 ```
 
-That's it! 🎉
+That's it!
 
 ## 📖 Usage
 
@@ -98,7 +98,7 @@ icongrabber <app-path> [options]
 - **512x512** - High-resolution (default)
 - **1024x1024** - Maximum quality
 
-## 💡 Examples
+## Examples
 
 ### Extract a Single Icon
 
@@ -147,7 +147,7 @@ if icongrabber /Applications/MyApp.app -o assets/icon.png -s 512; then
 fi
 ```
 
-## 📁 Output
+## Output
 
 ### Default Naming
 
@@ -167,7 +167,7 @@ Use `-o` to specify your own filename:
 icongrabber /Applications/Safari.app -o my-custom-name.png
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Mac Admins
 Extract app icons for your app catalogs
@@ -201,7 +201,7 @@ for app in /Applications/*.app; do
 done
 ```
 
-## 🛠️ Development
+## Development
 
 ### Build from Source
 
@@ -249,13 +249,13 @@ The project uses GitHub Actions for automated testing:
 
 View the [CI workflow](.github/workflows/ci.yml) for details.
 
-## 📚 Documentation
+## Documentation
 
 - [Quick Start Guide](QUICKSTART.md) - Detailed getting started guide
 - [Examples](examples/README.md) - Example scripts and use cases
 - Man Page - `man icongrabber` (after installation)
 
-## ❓ FAQ
+## FAQ
 
 **Q: What formats are supported?**  
 A: Currently PNG format only. Icons are extracted at the highest quality available.
@@ -272,7 +272,7 @@ A: Yes! Just wrap the path in quotes: `icongrabber "/Applications/Visual Studio 
 **Q: Can I use `~` in paths?**  
 A: Yes, tilde expansion is supported: `icongrabber ~/Applications/MyApp.app`
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Feel free to:
 
@@ -283,7 +283,7 @@ Contributions are welcome! Feel free to:
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## 🏗️ For Maintainers
+## For Maintainers
 
 ### Creating Releases
 
@@ -316,11 +316,11 @@ First-time setup to enable code signing and notarization:
 
 This interactive script will guide you through exporting your Apple Developer certificates and configuring GitHub secrets.
 
-## 📄 License
+## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with Swift and AppKit for the macOS community.
 
