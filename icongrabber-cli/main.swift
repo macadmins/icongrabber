@@ -203,7 +203,7 @@ func saveIconAsPNG(_ icon: NSImage, to outputPath: String, size: Int) throws {
 func generateOutputPath(for inputPath: String) -> String {
     let url = URL(fileURLWithPath: inputPath)
     let appName = url.deletingPathExtension().lastPathComponent
-    let cleanName = appName.replacingOccurrences(of: " ", with: "_")
+    let cleanName = appName.replacingOccurrences(of: " ", with: "")
     return "\(cleanName).png"
 }
 

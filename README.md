@@ -159,12 +159,12 @@ fi
 
 ### Default Naming
 
-Icons are automatically named based on the app name:
+Icons are automatically named based on the app name (spaces removed):
 
 | Application | Output File |
 |-------------|-------------|
 | Safari.app | `Safari.png` |
-| Visual Studio Code.app | `Visual_Studio_Code.png` |
+| Visual Studio Code.app | `VisualStudioCode.png` |
 | Calculator.app | `Calculator.png` |
 
 ### Custom Naming
@@ -173,40 +173,6 @@ Use `-o` to specify your own filename:
 
 ```bash
 icongrabber /Applications/Safari.app -o my-custom-name.png
-```
-
-## Use Cases
-
-### Mac Admins
-Extract app icons for your app catalogs
-```bash
-icongrabber /Applications/YourApp.app -o public/images/app-icon.png -s 256
-```
-
-### Web Development
-Extract app icons for your website or documentation:
-```bash
-icongrabber /Applications/YourApp.app -o public/images/app-icon.png -s 256
-```
-
-### Design Assets
-Create a complete set of icon sizes:
-```bash
-./examples/extract_multiple_sizes.sh /Applications/YourApp.app
-```
-
-### Documentation
-Add app icons to your README or docs:
-```bash
-icongrabber /Applications/MyApp.app -o docs/images/app-icon.png -s 128
-```
-
-### App Development
-Extract icons for mockups or prototypes:
-```bash
-for app in /Applications/*.app; do
-    icongrabber "$app" -o "icons/$(basename "$app" .app).png" -s 512
-done
 ```
 
 ## Development
