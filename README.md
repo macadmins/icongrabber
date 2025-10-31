@@ -1,14 +1,18 @@
+<div align="center">
+
 # Icon Grabber
 
 **A fast, simple command-line tool to extract high-quality icons from macOS applications.**
 
 Perfect for developers, designers, and anyone who needs app icons for websites, documentation, or projects.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
-[![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
-[![CI Tests](https://github.com/kitzy/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/kitzy/icongrabber/actions)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/kitzy?logo=github&color=ea4aaa)](https://github.com/sponsors/kitzy)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg?style=for-the-badge)](https://www.apple.com/macos/)
+[![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg?style=for-the-badge)](https://swift.org)
+[![CI Tests](https://img.shields.io/github/actions/workflow/status/kitzy/icongrabber/ci.yml?branch=main&label=CI%20Tests&style=for-the-badge)](https://github.com/kitzy/icongrabber/actions)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/kitzy?logo=github&color=ea4aaa&style=for-the-badge)](https://github.com/sponsors/kitzy)
+
+</div>
 
 ## Features
 
