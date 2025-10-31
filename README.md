@@ -1,13 +1,16 @@
+<div align="center">
+
 # Icon Grabber
 
 **A fast, simple command-line tool to extract high-quality icons from macOS applications.**
-
-Perfect for developers, designers, and anyone who needs app icons for websites, documentation, or projects.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
 [![CI Tests](https://github.com/kitzy/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/kitzy/icongrabber/actions)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/kitzy?logo=github&color=ea4aaa)](https://github.com/sponsors/kitzy)
+
+</div>
 
 ## Features
 
@@ -19,35 +22,47 @@ Perfect for developers, designers, and anyone who needs app icons for websites, 
 
 ## Installation
 
-### Quick Install (System-wide)
+### Download Release (Recommended)
+
+Download the latest signed and notarized installer from [Releases](https://github.com/kitzy/icongrabber/releases):
+
+```bash
+# Download the latest PKG installer
+curl -LO $(curl -s https://api.github.com/repos/kitzy/icongrabber/releases/latest | grep "browser_download_url.*\.pkg" | cut -d '"' -f 4)
+
+# Or if you know the latest version number, use:
+# curl -LO https://github.com/kitzy/icongrabber/releases/latest/download/icongrabber-VERSION.pkg
+
+# Install
+sudo installer -pkg icongrabber-*.pkg -target /
+
+# Verify installation
+icongrabber --version
+```
+
+### Build from Source
 
 ```bash
 # Clone the repository
 git clone https://github.com/kitzy/icongrabber.git
 cd icongrabber
 
-# Build and install
+# Build and install system-wide
 make build
 sudo make install
-```
 
-### User Install (No sudo required)
-
-```bash
-# Install to your home directory
+# Or install to your home directory (no sudo required)
 make build
 make install PREFIX=$HOME/.local
-
-# Add to your PATH (add this to ~/.zshrc or ~/.bashrc)
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH" # Add to ~/.zshrc
 ```
 
 ## Quick Start
 
-Extract an icon in 30 seconds:
+Extract an icon in less than 30 seconds:
 
 ```bash
-# Extract Safari's icon (creates Safari_512x512.png)
+# Extract Safari's icon (creates Safari.png)
 icongrabber /Applications/Safari.app
 
 # Custom size
@@ -55,11 +70,14 @@ icongrabber /Applications/Safari.app -s 256
 
 # Custom output location
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
+
+# Force overwrite existing file
+icongrabber /Applications/Safari.app -f
 ```
 
-That's it!
+That's it! 
 
-## 📖 Usage
+## Usage
 
 ### Basic Usage
 
@@ -74,6 +92,7 @@ icongrabber <app-path> [options]
 | `-s, --size <pixels>` | Icon size (default: 512) | `-s 256` |
 | `-o, --output <path>` | Output file path | `-o icon.png` |
 | `-i, --input <path>` | Input app path (alternative) | `-i /Applications/Safari.app` |
+| `-f, --force` | Overwrite existing files without prompting | `-f` |
 | `-h, --help` | Show help message | `-h` |
 | `-v, --version` | Show version | `-v` |
 
@@ -140,13 +159,13 @@ fi
 
 ### Default Naming
 
-Icons are automatically named based on the app name:
+Icons are automatically named based on the app name (spaces removed):
 
 | Application | Output File |
 |-------------|-------------|
-| Safari.app | `Safari_512x512.png` |
-| Visual Studio Code.app | `Visual_Studio_Code_512x512.png` |
-| Calculator.app | `Calculator_512x512.png` |
+| Safari.app | `Safari.png` |
+| Visual Studio Code.app | `VisualStudioCode.png` |
+| Calculator.app | `Calculator.png` |
 
 ### Custom Naming
 
@@ -154,40 +173,6 @@ Use `-o` to specify your own filename:
 
 ```bash
 icongrabber /Applications/Safari.app -o my-custom-name.png
-```
-
-## Use Cases
-
-### Mac Admins
-Extract app icons for your app catalogs
-```bash
-icongrabber /Applications/YourApp.app -o public/images/app-icon.png -s 256
-```
-
-### Web Development
-Extract app icons for your website or documentation:
-```bash
-icongrabber /Applications/YourApp.app -o public/images/app-icon.png -s 256
-```
-
-### Design Assets
-Create a complete set of icon sizes:
-```bash
-./examples/extract_multiple_sizes.sh /Applications/YourApp.app
-```
-
-### Documentation
-Add app icons to your README or docs:
-```bash
-icongrabber /Applications/MyApp.app -o docs/images/app-icon.png -s 128
-```
-
-### App Development
-Extract icons for mockups or prototypes:
-```bash
-for app in /Applications/*.app; do
-    icongrabber "$app" -o "icons/$(basename "$app" .app).png" -s 512
-done
 ```
 
 ## Development
@@ -231,34 +216,36 @@ make clean
 ### Continuous Integration
 
 The project uses GitHub Actions for automated testing:
-- ✅ Integration tests on every PR
-- ✅ Multi-version testing (macOS 15, latest)
-- ✅ Installation verification
-- ✅ Swift syntax checking
+- Integration tests on every PR
+- Multi-version testing (macOS 15, latest)
+- Installation verification
+- Swift syntax checking
 
 View the [CI workflow](.github/workflows/ci.yml) for details.
 
 ## Documentation
 
-- [Quick Start Guide](QUICKSTART.md) - Detailed getting started guide
-- [Examples](examples/README.md) - Example scripts and use cases
+- [Contributing Guide](CONTRIBUTING.md) - How to contribute
+- [Release Guide](.github/RELEASE_GUIDE.md) - For maintainers: creating releases
+- [Test Documentation](tests/README.md) - Test suite details
+- [Scripts Documentation](scripts/README.md) - Helper scripts
 - Man Page - `man icongrabber` (after installation)
 
 ## FAQ
 
-**Q: What formats are supported?**  
+**Q: What formats are supported?** 
 A: Currently PNG format only. Icons are extracted at the highest quality available.
 
-**Q: What if an app doesn't have an icon?**  
+**Q: What if an app doesn't have an icon?** 
 A: The tool will exit with an error code and display an error message.
 
-**Q: Can I use this in my build scripts?**  
+**Q: Can I use this in my build scripts?** 
 A: Absolutely! The tool returns proper exit codes (0 for success, non-zero for errors) for easy integration.
 
-**Q: Does this work with paths containing spaces?**  
+**Q: Does this work with paths containing spaces?** 
 A: Yes! Just wrap the path in quotes: `icongrabber "/Applications/Visual Studio Code.app"`
 
-**Q: Can I use `~` in paths?**  
+**Q: Can I use `~` in paths?** 
 A: Yes, tilde expansion is supported: `icongrabber ~/Applications/MyApp.app`
 
 ## Contributing
@@ -271,6 +258,29 @@ Contributions are welcome! Feel free to:
 - Improve documentation
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## For Maintainers
+
+### Creating Releases
+
+See the complete [Release Guide](.github/RELEASE_GUIDE.md) for detailed instructions.
+
+**Quick release:**
+```bash
+# 1. Update CHANGELOG.md
+# 2. Create and push tag
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow automatically builds, signs, notarizes, and publishes the release.
+
+**First-time setup:**
+```bash
+./scripts/setup_signing.sh
+```
+
+This configures code signing and notarization (requires Apple Developer account).
 
 ## License
 

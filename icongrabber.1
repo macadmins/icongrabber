@@ -14,13 +14,13 @@ extracts the icon from a macOS application bundle (.app) and saves it as a PNG i
 Input application path (alternative to positional argument)
 .TP
 .BR \-o ", " \-\-output " \fIPATH\fR"
-Output file path. If not specified, defaults to \fIAppName_SIZExSIZE.png\fR in the current directory. If a directory path is provided, the filename will be auto-generated.
+Output file path. If not specified, defaults to \fIAppName.png\fR in the current directory. If a directory path is provided, the filename will be auto-generated.
 .TP
 .BR \-s ", " \-\-size " \fIPIXELS\fR"
 Icon size in pixels (default: 512). Common sizes are 16, 32, 64, 128, 256, 512, and 1024.
 .TP
-.BR \-f ", " \-\-format " \fIFORMAT\fR"
-Output format. Currently only "png" is supported (default: png).
+.BR \-f ", " \-\-force
+Overwrite existing files without prompting for confirmation.
 .TP
 .BR \-h ", " \-\-help
 Display help message and exit
@@ -51,25 +51,30 @@ Extract icon at specific size:
 Specify output location:
 .B icongrabber /Applications/Safari.app \-o ~/Desktop/safari.png
 .TP
+Force overwrite without prompting:
+.B icongrabber /Applications/Safari.app \-f
+.TP
 Extract with all options:
-.B icongrabber \-i /Applications/Xcode.app \-o xcode_icon.png \-s 1024
+.B icongrabber \-i /Applications/Xcode.app \-o xcode_icon.png \-s 1024 \-f
 .TP
 Batch processing:
 .nf
 for app in /Applications/*.app; do
-    icongrabber "$app" \-s 512 \-o "icons/$(basename "$app" .app).png"
+    icongrabber "$app" \-s 512 \-o "icons/$(basename "$app" .app).png" \-f
 done
 .fi
 .SH NOTES
 The extracted icons are the actual application icons as registered with macOS. The quality and availability of different sizes depends on the application's icon resources.
 
-macOS application icons are typically stored as raster images (PNG/ICNS format). SVG export is not currently supported as it would require vectorization.
+If an output file already exists, icongrabber will prompt for confirmation before overwriting unless the \-\-force flag is used.
+
+macOS application icons are stored as raster images in PNG format. All output is in PNG format.
 
 Paths beginning with ~ (tilde) are automatically expanded to the user's home directory.
 .SH BUGS
 Report bugs at: https://github.com/kitzy/icongrabber/issues
 .SH AUTHOR
-Icon Grabber was created for extracting and exporting macOS application icons.
+https://github.com/kitzy
 .SH SEE ALSO
 .BR iconutil (1),
 .BR sips (1)

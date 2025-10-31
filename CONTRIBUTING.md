@@ -1,6 +1,6 @@
 # Contributing to Icon Grabber
 
-Thank you for your interest in contributing to Icon Grabber! 🎉
+Thank you for your interest in contributing to Icon Grabber! 
 
 ## Getting Started
 
@@ -48,18 +48,18 @@ See [tests/README.md](tests/README.md) for details.
 
 ## Code Guidelines
 
-- **Swift Style**: Follow standard Swift conventions
-- **Comments**: Add comments for complex logic
-- **Error Handling**: Always handle errors gracefully
-- **User Messages**: Keep CLI output clear and helpful
+- **Swift Style:** Follow standard Swift conventions
+- **Comments:** Add comments for complex logic
+- **Error Handling:** Always handle errors gracefully
+- **User Messages:** Keep CLI output clear and helpful
 
 ## Pull Request Process
 
-1. **Update Documentation**: If you add features, update the README
-2. **Add Tests**: Add tests for new functionality
-3. **Pass CI**: Ensure all GitHub Actions checks pass
-4. **Description**: Provide a clear description of changes
-5. **One Feature**: Keep PRs focused on a single feature/fix
+1. **Update Documentation:** If you add features, update the README
+2. **Add Tests:** Add tests for new functionality
+3. **Pass CI:** Ensure all GitHub Actions checks pass
+4. **Description:** Provide a clear description of changes
+5. **One Feature:** Keep PRs focused on a single feature/fix
 
 ## Reporting Bugs
 
@@ -87,3 +87,4 @@ Feel free to open an issue for any questions about contributing!
 ## License
 
 By contributing, you agree that your contributions will be licensed under the Apache License 2.0.
+
