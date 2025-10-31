@@ -192,6 +192,10 @@ jobs:
             <organization>${{ env.BUNDLE_ID }}</organization>
             <domains enable_localSystem="true"/>
             <options customize="never" require-scripts="false" rootVolumeOnly="true" />
+            <!-- Require macOS 15.0 (Sequoia) or later -->
+            <allowed-os-versions>
+                <os-version min="15.0" />
+            </allowed-os-versions>
             <choices-outline>
                 <line choice="default">
                     <line choice="${{ env.BUNDLE_ID }}"/>

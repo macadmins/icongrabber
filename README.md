@@ -17,6 +17,10 @@
 
 </div>
 
+## Requirements
+
+- **macOS 15 (Sequoia) or later**
+
 ## Features
 
 - **Simple & Fast** - Extract icons with a single command
