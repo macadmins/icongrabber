@@ -1,6 +1,6 @@
 # Icon Grabber - Quick Start Guide
 
-## 🚀 Get Started in 30 Seconds
+## Get Started in Seconds
 ```bash
 # Build
 make build
@@ -11,7 +11,7 @@ make build
 # That's it! safari_512x512.png is created
 ```
 
-## 📝 Common Commands
+## Common Commands
 
 ### CLI Quick Reference
 
@@ -26,7 +26,7 @@ icongrabber /Applications/Safari.app -s 256
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 
 # All options
-icongrabber -i /Applications/Safari.app -o output.png -s 1024
+icongrabber -i /Applications/Safari.app -o output.png -s 128
 
 # Help
 icongrabber --help
@@ -51,19 +51,19 @@ make test
 make clean
 ```
 
-## 📝 Notes
+### Notes
 
 - macOS app icons are raster images (PNG/ICNS format)
 - SVG export would require vectorization (not currently supported)
 - Paths with `~` are automatically expanded
 - Exit codes: 0 (success), 1 (error), 2 (invalid args), 3 (extraction failed)
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Web Developer
 Extract app icons for your website or documentation:
 ```bash
-icongrabber /Applications/YourApp.app -o assets/app-icon.png -s 256
+icongrabber /Applications/Your App.app -o assets/app-icon.png -s 256
 ```
 
 ### Batch Processing
@@ -83,31 +83,31 @@ Integrate into your build scripts:
 ```bash
 #!/bin/bash
 if icongrabber "$APP_PATH" -o "$OUTPUT" -s 512; then
-    echo "✓ Icon extracted"
-    # Do something with the icon
+  echo "✓ Icon extracted"
+  # Do something with the icon
 fi
 ```
 
-## 📁 Output Files
+## Output Files
 
-Default naming pattern: `AppName_512x512.png`
+Default naming pattern: `App Name_512x512.png`
 
 Examples:
 - Safari.app → `Safari_512x512.png`
 - Visual Studio Code.app → `Visual_Studio_Code_512x512.png`
 - Calculator.app → `Calculator_512x512.png`
 
-## ⚙️ Available Sizes
+### Available Sizes
 
 - 16×16 (Small)
 - 32×32 (Small)
 - 64×64 (Medium)
 - 128×128 (Medium)
 - 256×256 (Large)
-- **512×512 (Default)**
+- 512×512 (Default)
 - 1024×1024 (Extra Large)
 
-## 🆘 Need Help?
+## Need Help?
 
 ```bash
 # Show all options
@@ -116,5 +116,6 @@ icongrabber --help
 # Show version
 icongrabber --version
 ```
+
 
 See the main [README.md](README.md) for complete documentation.

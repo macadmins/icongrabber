@@ -43,7 +43,7 @@ icongrabber /Applications/Safari.app -o safari.png -s 512
 
 # Check if successful
 if [ $? -eq 0 ]; then
-    echo "Icon extracted successfully!"
+  echo "Icon extracted successfully!"
 fi
 ```
 
@@ -53,3 +53,4 @@ fi
 - Use `-o` to specify output paths for better organization
 - Common sizes are: 16, 32, 64, 128, 256, 512, 1024
 - Output format is currently PNG only
+

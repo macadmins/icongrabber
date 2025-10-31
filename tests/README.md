@@ -33,10 +33,10 @@ The test suite includes the following tests:
 10. **Version flag** - Ensures `--version` works
 
 ### Error Handling Tests
-11. **Invalid app path** - Graceful failure with non-existent apps
-12. **Missing arguments** - Proper error handling
-13. **Multiple sizes** - Tests various standard icon sizes
-14. **File overwrite** - Tests overwriting existing files
+1. **Invalid app path** - Graceful failure with non-existent apps
+2. **Missing arguments** - Proper error handling
+3. **Multiple sizes** - Tests various standard icon sizes
+4. **File overwrite** - Tests overwriting existing files
 
 ## Test Output
 
@@ -56,26 +56,26 @@ Tests run automatically on:
 
 See `.github/workflows/ci.yml` for the full CI configuration.
 
-## CI Jobs
+### CI Jobs
 
-### 1. Test Job
-- Runs full integration test suite
-- Uploads test artifacts for inspection
-- Tests help and version commands
+1. **Test Job**
+   - Runs full integration test suite
+   - Uploads test artifacts for inspection
+   - Tests help and version commands
 
-### 2. Multi-Version Build Test
-- Tests on macOS 13, 14, and latest
-- Ensures compatibility across macOS versions
-- Runs quick smoke tests
+2. **Multi-Version Build Test**
+   - Tests on macOS 11, 12, and latest
+   - Ensures compatibility across macOS versions
+   - Runs quick smoke tests
 
-### 3. Lint and Format
-- Checks Swift syntax
-- Verifies project structure
+3. **Lint and Format**
+   - Checks Swift syntax
+   - Verifies project structure
 
-### 4. Installation Test
-- Tests build and installation process
-- Verifies binary works after installation
-- Tests user-level installation (no sudo)
+4. **Installation Test**
+   - Tests build and installation process
+   - Verifies binary works after installation
+   - Tests user-level installation (no sudo)
 
 ## Requirements
 
@@ -100,7 +100,7 @@ To add a new test:
    - `assert_file_size <path> <min_bytes>`
    - `assert_exit_code <expected> <actual>`
 
-Example:
+### Example:
 
 ```bash
 print_test 15 "My new test description"
@@ -134,3 +134,4 @@ make test
 # Clean up
 make clean
 ```
+

@@ -1,4 +1,4 @@
-# 🎨 Icon Grabber
+# Icon Grabber
 
 **A fast, simple command-line tool to extract high-quality icons from macOS applications.**
 
@@ -8,41 +8,53 @@ Perfect for developers, designers, and anyone who needs app icons for websites, 
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
 [![CI Tests](https://github.com/kitzy/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/kitzy/icongrabber/actions)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/kitzy?logo=github&color=ea4aaa)](https://github.com/sponsors/kitzy)
 
-## ✨ Features
+## Features
 
-- 🚀 **Simple & Fast** - Extract icons with a single command
-- 🎯 **Flexible Sizing** - Get icons in any size from 16x16 to 1024x1024
-- 📦 **High Quality** - Preserves original icon quality in PNG format
-- 🛠️ **Scriptable** - Perfect for automation and batch processing
-- 💻 **Native** - Written in Swift, lightweight, no dependencies
+- **Simple & Fast** - Extract icons with a single command
+- **Flexible Sizing** - Get icons in any size from 16x16 to 1024x1024
+- **High Quality** - Preserves original icon quality in PNG format
+- **Scriptable** - Perfect for automation and batch processing
+- **Native** - Written in Swift, lightweight, no dependencies
 
-## 📥 Installation
+## Installation
 
-### Quick Install (System-wide)
+### Download Release (Recommended)
+
+Download the latest signed and notarized installer from [Releases](https://github.com/kitzy/icongrabber/releases):
+
+```bash
+# Download the PKG installer
+curl -LO https://github.com/kitzy/icongrabber/releases/latest/download/icongrabber-1.0.0.pkg
+
+# Install (no Gatekeeper warnings!)
+sudo installer -pkg icongrabber-1.0.0.pkg -target /
+
+# Verify installation
+icongrabber --version
+```
+
+The PKG installer is fully signed and notarized - no security warnings!
+
+### Build from Source
 
 ```bash
 # Clone the repository
 git clone https://github.com/kitzy/icongrabber.git
 cd icongrabber
 
-# Build and install
+# Build and install system-wide
 make build
 sudo make install
-```
 
-### User Install (No sudo required)
-
-```bash
-# Install to your home directory
+# Or install to your home directory (no sudo required)
 make build
 make install PREFIX=$HOME/.local
-
-# Add to your PATH (add this to ~/.zshrc or ~/.bashrc)
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH" # Add to ~/.zshrc
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 Extract an icon in 30 seconds:
 
@@ -57,9 +69,9 @@ icongrabber /Applications/Safari.app -s 256
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 ```
 
-That's it! 🎉
+That's it! 
 
-## 📖 Usage
+## Usage
 
 ### Basic Usage
 
@@ -87,7 +99,7 @@ icongrabber <app-path> [options]
 - **512x512** - High-resolution (default)
 - **1024x1024** - Maximum quality
 
-## 💡 Examples
+## Examples
 
 ### Extract a Single Icon
 
@@ -136,7 +148,7 @@ if icongrabber /Applications/MyApp.app -o assets/icon.png -s 512; then
 fi
 ```
 
-## 📁 Output
+## Output
 
 ### Default Naming
 
@@ -156,7 +168,13 @@ Use `-o` to specify your own filename:
 icongrabber /Applications/Safari.app -o my-custom-name.png
 ```
 
-## 🎯 Use Cases
+## Use Cases
+
+### Mac Admins
+Extract app icons for your app catalogs
+```bash
+icongrabber /Applications/YourApp.app -o public/images/app-icon.png -s 256
+```
 
 ### Web Development
 Extract app icons for your website or documentation:
@@ -184,7 +202,7 @@ for app in /Applications/*.app; do
 done
 ```
 
-## 🛠️ Development
+## Development
 
 ### Build from Source
 
@@ -225,37 +243,37 @@ make clean
 ### Continuous Integration
 
 The project uses GitHub Actions for automated testing:
-- ✅ Integration tests on every push and PR
-- ✅ Multi-version testing (macOS 13, 14, latest)
-- ✅ Installation verification
-- ✅ Swift syntax checking
+- Integration tests on every PR
+- Multi-version testing (macOS 15, latest)
+- Installation verification
+- Swift syntax checking
 
 View the [CI workflow](.github/workflows/ci.yml) for details.
 
-## 📚 Documentation
+## Documentation
 
 - [Quick Start Guide](QUICKSTART.md) - Detailed getting started guide
 - [Examples](examples/README.md) - Example scripts and use cases
 - Man Page - `man icongrabber` (after installation)
 
-## ❓ FAQ
+## FAQ
 
-**Q: What formats are supported?**  
+**Q: What formats are supported?** 
 A: Currently PNG format only. Icons are extracted at the highest quality available.
 
-**Q: What if an app doesn't have an icon?**  
+**Q: What if an app doesn't have an icon?** 
 A: The tool will exit with an error code and display an error message.
 
-**Q: Can I use this in my build scripts?**  
+**Q: Can I use this in my build scripts?** 
 A: Absolutely! The tool returns proper exit codes (0 for success, non-zero for errors) for easy integration.
 
-**Q: Does this work with paths containing spaces?**  
+**Q: Does this work with paths containing spaces?** 
 A: Yes! Just wrap the path in quotes: `icongrabber "/Applications/Visual Studio Code.app"`
 
-**Q: Can I use `~` in paths?**  
+**Q: Can I use `~` in paths?** 
 A: Yes, tilde expansion is supported: `icongrabber ~/Applications/MyApp.app`
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Feel free to:
 
@@ -266,14 +284,47 @@ Contributions are welcome! Feel free to:
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## 📄 License
+## For Maintainers
+
+### Creating Releases
+
+To create a new signed and notarized release:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The [release workflow](.github/workflows/release.yml) will automatically:
+- Build and sign the binary
+- Create a signed `.pkg` installer
+- Notarize with Apple (no Gatekeeper warnings!)
+- Create a GitHub release with all artifacts
+
+**Documentation:**
+- [Release Setup Guide](.github/RELEASE_SETUP.md) - Configure code signing (one-time)
+- [Creating Releases](.github/CREATING_RELEASES.md) - Release process
+- [Quick Reference](.github/QUICK_REFERENCE.md) - Command cheat sheet
+- [Workflow Architecture](.github/WORKFLOW_ARCHITECTURE.md) - Technical details
+
+### Setup Signing
+
+First-time setup to enable code signing and notarization:
+
+```bash
+./scripts/setup_signing.sh
+```
+
+This interactive script will guide you through exporting your Apple Developer certificates and configuring GitHub secrets.
+
+## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with Swift and AppKit for the macOS community.
 
 ---
 
-**Made with ❤️ for macOS developers and designers**
+**Made with ❤️ for macOS administrators, developers and designers**
