@@ -26,26 +26,39 @@ The test suite includes the following tests:
 3. **Small size** - 64x64 icon extraction
 4. **Large size** - 1024x1024 icon extraction
 5. **File size validation** - Ensures output files are reasonable size
-6. **Default naming** - Tests automatic filename generation
+6. **Default naming** - Tests automatic filename generation (AppName.png)
 7. **Custom output path** - Tests directory creation and custom paths
 8. **Positional arguments** - Tests CLI argument parsing
 9. **Help flag** - Ensures `--help` works
 10. **Version flag** - Ensures `--version` works
 
 ### Error Handling Tests
-1. **Invalid app path** - Graceful failure with non-existent apps
-2. **Missing arguments** - Proper error handling
-3. **Multiple sizes** - Tests various standard icon sizes
-4. **File overwrite** - Tests overwriting existing files
+11. **Invalid app path** - Graceful failure with non-existent apps
+12. **Missing arguments** - Proper error handling
+13. **Multiple sizes** - Tests various standard icon sizes (16, 32, 128, 256, 512)
+
+### File Overwrite Protection Tests
+14. **Force flag** - Tests `--force` flag overwrites without prompting
+15. **Non-interactive mode** - Ensures CI-safe behavior (rejects overwrite without --force)
+16. **Force in non-interactive** - Tests force flag works in CI/piped environments
+17. **Short form -f flag** - Tests both `-f` and `--force` work identically
 
 ## Test Output
 
 Tests create temporary files that are automatically cleaned up:
 - `test_*.png` - Various test output files
-- `*_512x512.png` - Default named output files
+- `Safari.png` / `Calculator.png` - Default named output files
 - `test_output/` - Test directory for path tests
 
 All artifacts are removed after test completion.
+
+## CI/Non-Interactive Behavior
+
+The tool detects when running in non-interactive mode (CI, piped input, etc.) using `isatty()`. In such environments:
+- File overwrite prompts are skipped
+- Returns error code 1 if file exists and `--force` not used
+- Prevents tests from hanging waiting for user input
+- Ensures CI-safe operation
 
 ## GitHub Actions
 

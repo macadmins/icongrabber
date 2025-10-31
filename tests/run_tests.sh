@@ -22,8 +22,8 @@ cleanup() {
     echo ""
     echo "Cleaning up test artifacts..."
     rm -f test_*.png
-    rm -f Safari_*.png
-    rm -f Calculator_*.png
+    rm -f Safari*.png
+    rm -f Calculator*.png
     rm -rf test_output
 }
 
@@ -105,22 +105,22 @@ echo "================================"
 
 # Test 1: Basic extraction (default size)
 print_test 1 "Basic icon extraction (default 512x512)"
-$CLI "$TEST_APP" -o test_basic.png
+$CLI "$TEST_APP" -o test_basic.png -f
 assert_file_exists "test_basic.png"
 
 # Test 2: Custom size (256x256)
 print_test 2 "Custom size extraction (256x256)"
-$CLI "$TEST_APP" -s 256 -o test_256.png
+$CLI "$TEST_APP" -s 256 -o test_256.png -f
 assert_file_exists "test_256.png"
 
 # Test 3: Small size (64x64)
 print_test 3 "Small icon extraction (64x64)"
-$CLI "$TEST_APP" -s 64 -o test_64.png
+$CLI "$TEST_APP" -s 64 -o test_64.png -f
 assert_file_exists "test_64.png"
 
 # Test 4: Large size (1024x1024)
 print_test 4 "Large icon extraction (1024x1024)"
-$CLI "$TEST_APP" -s 1024 -o test_1024.png
+$CLI "$TEST_APP" -s 1024 -o test_1024.png -f
 assert_file_exists "test_1024.png"
 
 # Test 5: File size validation (should be reasonable)
@@ -129,18 +129,18 @@ assert_file_size "test_basic.png" 1000
 
 # Test 6: Default output naming
 print_test 6 "Default output naming"
-$CLI "$TEST_APP"
-assert_file_exists "${APP_NAME}_512x512.png"
+$CLI "$TEST_APP" -f
+assert_file_exists "${APP_NAME}.png"
 
 # Test 7: Custom output path with directory creation
 print_test 7 "Custom output path with directory creation"
 mkdir -p test_output
-$CLI "$TEST_APP" -o test_output/icon.png -s 128
+$CLI "$TEST_APP" -o test_output/icon.png -s 128 -f
 assert_file_exists "test_output/icon.png"
 
 # Test 8: Positional argument (without -i flag)
 print_test 8 "Positional argument support"
-$CLI "$TEST_APP" -s 128 -o test_positional.png
+$CLI "$TEST_APP" -s 128 -o test_positional.png -f
 assert_file_exists "test_positional.png"
 
 # Test 9: Help flag
@@ -183,12 +183,12 @@ else
     fail_test "Should have failed with missing input"
 fi
 
-# Test 13: Multiple size formats
+# Test 13: Multiple standard sizes (16, 32, 128, 256, 512)
 print_test 13 "Multiple standard sizes (16, 32, 128, 256, 512)"
 sizes=(16 32 128 256 512)
 all_exist=true
 for size in "${sizes[@]}"; do
-    $CLI "$TEST_APP" -s $size -o test_${size}.png
+    $CLI "$TEST_APP" -s $size -o test_${size}.png -f
     if [ ! -f "test_${size}.png" ]; then
         all_exist=false
         break
@@ -200,11 +200,40 @@ else
     fail_test "Some size extractions failed"
 fi
 
-# Test 14: Overwrite existing file
-print_test 14 "Overwrite existing file"
+# Test 14: Force flag to overwrite without prompt
+print_test 14 "Force flag overwrites without prompting"
 $CLI "$TEST_APP" -o test_overwrite.png -s 128
-$CLI "$TEST_APP" -o test_overwrite.png -s 256
+# This should overwrite without prompting when using --force
+$CLI "$TEST_APP" -o test_overwrite.png -s 256 --force
 assert_file_exists "test_overwrite.png"
+
+# Test 15: Non-interactive mode rejects overwrite without --force
+print_test 15 "Non-interactive mode rejects overwrite (CI-safe)"
+$CLI "$TEST_APP" -o test_no_interactive.png -s 128
+# In non-interactive mode (piped input), should fail without --force
+set +e
+echo "y" | $CLI "$TEST_APP" -o test_no_interactive.png -s 256 > /dev/null 2>&1
+exit_code=$?
+set -e
+# Should fail (exit code 1) in non-interactive mode
+if [ $exit_code -eq 1 ]; then
+    pass_test
+else
+    fail_test "Expected exit code 1 in non-interactive mode, got $exit_code"
+fi
+
+# Test 16: Force flag works in non-interactive mode
+print_test 16 "Force flag works in non-interactive mode"
+$CLI "$TEST_APP" -o test_force_non_interactive.png -s 128
+# This should succeed with --force even in non-interactive mode
+$CLI "$TEST_APP" -o test_force_non_interactive.png -s 256 --force
+assert_file_exists "test_force_non_interactive.png"
+
+# Test 17: Short form -f flag works
+print_test 17 "Short form -f flag for force"
+$CLI "$TEST_APP" -o test_force_short.png -s 128
+$CLI "$TEST_APP" -o test_force_short.png -s 256 -f
+assert_file_exists "test_force_short.png"
 
 # Print summary
 echo ""

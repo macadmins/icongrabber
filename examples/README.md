@@ -41,6 +41,9 @@ You can easily create your own scripts. Here's a simple template:
 # Extract a single icon
 icongrabber /Applications/Safari.app -o safari.png -s 512
 
+# Force overwrite without prompting (useful in scripts)
+icongrabber /Applications/Safari.app -o safari.png -s 512 -f
+
 # Check if successful
 if [ $? -eq 0 ]; then
   echo "Icon extracted successfully!"
@@ -51,6 +54,8 @@ fi
 
 - Always check exit codes for error handling
 - Use `-o` to specify output paths for better organization
+- Use `-f` / `--force` flag in automated scripts to avoid prompts
 - Common sizes are: 16, 32, 64, 128, 256, 512, 1024
 - Output format is currently PNG only
+- Default filename is `AppName.png` (no size suffix unless you specify one)
 

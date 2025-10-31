@@ -2,9 +2,7 @@
 //  main.swift
 //  icongrabber-cli
 //
-//  Created on October 30, 2025.
-//
-//  Copyright 2025 Icon Grabber
+//  Copyright 2025 Kitzy
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -28,7 +26,7 @@ struct CLIArguments {
     var inputPath: String?
     var outputPath: String?
     var size: Int = 512
-    var format: String = "png"
+    var force: Bool = false
     var help: Bool = false
     var version: Bool = false
 }
@@ -46,6 +44,8 @@ func parseArguments() -> CLIArguments {
             args.help = true
         case "-v", "--version":
             args.version = true
+        case "-f", "--force":
+            args.force = true
         case "-i", "--input":
             i += 1
             if i < arguments.count {
@@ -60,11 +60,6 @@ func parseArguments() -> CLIArguments {
             i += 1
             if i < arguments.count, let size = Int(arguments[i]) {
                 args.size = size
-            }
-        case "-f", "--format":
-            i += 1
-            if i < arguments.count {
-                args.format = arguments[i].lowercased()
             }
         default:
             // Treat as input path if no input specified yet
@@ -92,19 +87,22 @@ func printHelp() {
     
     OPTIONS:
         -i, --input <path>      Input application path (alternative to positional arg)
-        -o, --output <path>     Output file path (default: <AppName>_<size>x<size>.png)
+        -o, --output <path>     Output file path (default: <AppName>.png)
         -s, --size <pixels>     Icon size in pixels (default: 512)
                                 Common sizes: 16, 32, 64, 128, 256, 512, 1024
-        -f, --format <format>   Output format: png (default: png)
+        -f, --force            Overwrite existing files without prompting
         -h, --help             Show this help message
         -v, --version          Show version information
     
     EXAMPLES:
-        # Extract Safari icon at 512x512
+        # Extract Safari icon at 512x512 (creates Safari.png)
         icongrabber /Applications/Safari.app
         
         # Extract to specific location with custom size
         icongrabber -i /Applications/Safari.app -o ~/Desktop/safari.png -s 256
+        
+        # Overwrite existing file without prompting
+        icongrabber /Applications/Safari.app -f
         
         # Extract multiple sizes
         icongrabber /Applications/Safari.app -s 128 -o safari_small.png
@@ -202,11 +200,29 @@ func saveIconAsPNG(_ icon: NSImage, to outputPath: String, size: Int) throws {
     try pngData.write(to: url)
 }
 
-func generateOutputPath(for inputPath: String, size: Int, format: String) -> String {
+func generateOutputPath(for inputPath: String) -> String {
     let url = URL(fileURLWithPath: inputPath)
     let appName = url.deletingPathExtension().lastPathComponent
     let cleanName = appName.replacingOccurrences(of: " ", with: "_")
-    return "\(cleanName)_\(size)x\(size).\(format)"
+    return "\(cleanName).png"
+}
+
+func promptForOverwrite(path: String) -> Bool {
+    // Check if we're in an interactive terminal
+    guard isatty(STDIN_FILENO) != 0 else {
+        // Non-interactive mode (CI, pipe, etc.) - don't overwrite by default
+        fputs("Error: File '\(path)' already exists. Use --force to overwrite.\n", stderr)
+        return false
+    }
+    
+    print("File '\(path)' already exists. Overwrite? (y/N): ", terminator: "")
+    fflush(stdout)
+    
+    guard let response = readLine()?.lowercased().trimmingCharacters(in: .whitespaces) else {
+        return false
+    }
+    
+    return response == "y" || response == "yes"
 }
 
 // MARK: - Main Execution
@@ -238,12 +254,6 @@ func main() -> Int32 {
         fputs("Warning: Size \(args.size) is not a standard icon size. Supported: \(validSizes.map(String.init).joined(separator: ", "))\n", stderr)
     }
     
-    // Validate format
-    if args.format != "png" {
-        fputs("Error: Only PNG format is currently supported\n", stderr)
-        return 2
-    }
-    
     do {
         // Expand tilde and resolve relative paths
         let expandedInput = NSString(string: inputPath).expandingTildeInPath
@@ -260,13 +270,25 @@ func main() -> Int32 {
             // If output is a directory, generate filename
             var isDirectory: ObjCBool = false
             if FileManager.default.fileExists(atPath: expandedOutput, isDirectory: &isDirectory), isDirectory.boolValue {
-                let filename = generateOutputPath(for: resolvedInput, size: args.size, format: args.format)
+                let filename = generateOutputPath(for: resolvedInput)
                 outputPath = URL(fileURLWithPath: expandedOutput).appendingPathComponent(filename).path
             } else {
                 outputPath = expandedOutput
             }
         } else {
-            outputPath = generateOutputPath(for: resolvedInput, size: args.size, format: args.format)
+            outputPath = generateOutputPath(for: resolvedInput)
+        }
+        
+        // Check if file exists and prompt if not forced
+        if FileManager.default.fileExists(atPath: outputPath) && !args.force {
+            if !promptForOverwrite(path: outputPath) {
+                // In non-interactive mode, an error message is already printed
+                // In interactive mode, user chose not to overwrite
+                if isatty(STDIN_FILENO) != 0 {
+                    print("Operation cancelled.")
+                }
+                return 1
+            }
         }
         
         // Save icon

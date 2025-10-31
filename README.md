@@ -59,7 +59,7 @@ export PATH="$HOME/.local/bin:$PATH" # Add to ~/.zshrc
 Extract an icon in 30 seconds:
 
 ```bash
-# Extract Safari's icon (creates Safari_512x512.png)
+# Extract Safari's icon (creates Safari.png)
 icongrabber /Applications/Safari.app
 
 # Custom size
@@ -67,6 +67,9 @@ icongrabber /Applications/Safari.app -s 256
 
 # Custom output location
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
+
+# Force overwrite existing file
+icongrabber /Applications/Safari.app -f
 ```
 
 That's it! 
@@ -86,6 +89,7 @@ icongrabber <app-path> [options]
 | `-s, --size <pixels>` | Icon size (default: 512) | `-s 256` |
 | `-o, --output <path>` | Output file path | `-o icon.png` |
 | `-i, --input <path>` | Input app path (alternative) | `-i /Applications/Safari.app` |
+| `-f, --force` | Overwrite existing files without prompting | `-f` |
 | `-h, --help` | Show help message | `-h` |
 | `-v, --version` | Show version | `-v` |
 
@@ -156,9 +160,9 @@ Icons are automatically named based on the app name:
 
 | Application | Output File |
 |-------------|-------------|
-| Safari.app | `Safari_512x512.png` |
-| Visual Studio Code.app | `Visual_Studio_Code_512x512.png` |
-| Calculator.app | `Calculator_512x512.png` |
+| Safari.app | `Safari.png` |
+| Visual Studio Code.app | `Visual_Studio_Code.png` |
+| Calculator.app | `Calculator.png` |
 
 ### Custom Naming
 

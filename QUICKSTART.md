@@ -2,13 +2,10 @@
 
 ## Get Started in Seconds
 ```bash
-# Build
-make build
-
 # Extract an icon
 ./bin/icongrabber /Applications/Safari.app
 
-# That's it! safari_512x512.png is created
+# That's it! Safari.png is created
 ```
 
 ## Common Commands
@@ -25,8 +22,11 @@ icongrabber /Applications/Safari.app -s 256
 # Custom output location
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 
+# Force overwrite without prompting
+icongrabber /Applications/Safari.app -f
+
 # All options
-icongrabber -i /Applications/Safari.app -o output.png -s 128
+icongrabber -i /Applications/Safari.app -o output.png -s 128 -f
 
 # Help
 icongrabber --help
@@ -90,12 +90,14 @@ fi
 
 ## Output Files
 
-Default naming pattern: `App Name_512x512.png`
+Default naming pattern: `App_Name.png`
 
 Examples:
-- Safari.app → `Safari_512x512.png`
-- Visual Studio Code.app → `Visual_Studio_Code_512x512.png`
-- Calculator.app → `Calculator_512x512.png`
+- Safari.app → `Safari.png`
+- Visual Studio Code.app → `Visual_Studio_Code.png`
+- Calculator.app → `Calculator.png`
+
+Note: If a file already exists, you'll be prompted to confirm overwrite unless you use the `--force` flag.
 
 ### Available Sizes
 

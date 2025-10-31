@@ -49,7 +49,7 @@ for app in /Applications/*.app; do
     clean_name=$(echo "$app_name" | tr ' ' '_' | tr -cd '[:alnum:]_-')
     
     # Output path
-    output_path="$OUTPUT_DIR/${clean_name}_${ICON_SIZE}.png"
+    output_path="$OUTPUT_DIR/${clean_name}.png"
     
     # Skip if already extracted
     if [ -f "$output_path" ]; then

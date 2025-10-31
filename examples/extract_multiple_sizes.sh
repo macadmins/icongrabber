@@ -32,7 +32,7 @@ echo ""
 for size in "${SIZES[@]}"; do
     output="${APP_NAME}_${size}x${size}.png"
     
-    if $ICONGRABBER "$APP_PATH" -o "$output" -s "$size"; then
+    if $ICONGRABBER "$APP_PATH" -o "$output" -s "$size" -f; then
         echo "✓ Created: $output"
     else
         echo "✗ Failed: $output"
