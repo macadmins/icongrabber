@@ -26,6 +26,7 @@
 - **Simple & Fast** - Extract icons with a single command
 - **Flexible Sizing** - Get icons in any size from 16x16 to 1024x1024
 - **High Quality** - Preserves original icon quality in PNG format
+- **File Size Optimization** - Limit output file size using sips compression
 - **Scriptable** - Perfect for automation and batch processing
 - **Native** - Written in Swift, lightweight, no dependencies
 
@@ -80,6 +81,12 @@ icongrabber /Applications/Safari.app -s 256
 # Custom output location
 icongrabber /Applications/Safari.app -o ~/Desktop/my-icon.png
 
+# Limit file size to 100KB
+icongrabber /Applications/Safari.app -m 100KB
+
+# Limit file size to 2MB
+icongrabber /Applications/Safari.app -m 2M
+
 # Force overwrite existing file
 icongrabber /Applications/Safari.app -f
 ```
@@ -101,6 +108,7 @@ icongrabber <app-path> [options]
 | `-s, --size <pixels>` | Icon size (default: 512) | `-s 256` |
 | `-o, --output <path>` | Output file path | `-o icon.png` |
 | `-i, --input <path>` | Input app path (alternative) | `-i /Applications/Safari.app` |
+| `-m, --max-file-size <size>` | Max file size (optimizes with sips) | `-m 100KB` or `-m 2M` |
 | `-f, --force` | Overwrite existing files without prompting | `-f` |
 | `-h, --help` | Show help message | `-h` |
 | `-v, --version` | Show version | `-v` |
@@ -136,6 +144,19 @@ icongrabber /Applications/Safari.app -o ~/Desktop/safari-icon.png
 ```bash
 # Get a 256x256 icon
 icongrabber /Applications/Safari.app -s 256 -o small-icon.png
+```
+
+### Optimize File Size
+
+```bash
+# Extract icon and limit file size to 100KB (auto-selects 256x256)
+icongrabber /Applications/Safari.app -m 100KB
+
+# Limit to 2MB using shorthand (auto-selects 1024x1024)
+icongrabber /Applications/Safari.app -m 2M
+
+# Combine with custom size for better optimization (manual size selection)
+icongrabber /Applications/Safari.app -s 256 -m 50K -o optimized.png
 ```
 
 ### Multiple Sizes
@@ -244,6 +265,9 @@ View the [CI workflow](.github/workflows/ci.yml) for details.
 
 **Q: What formats are supported?** 
 A: Currently PNG format only. Icons are extracted at the highest quality available.
+
+**Q: How does the file size optimization work?**
+A: The `--max-file-size` option uses macOS's built-in `sips` tool to compress the icon by converting to JPEG with varying quality levels, then back to PNG. This reduces file size while maintaining reasonable visual quality. You can specify sizes like `100KB`, `100K`, `2MB`, or `2M` (case-insensitive). If you don't specify an icon size with `-s`, the tool will automatically select an appropriate size based on your file size target.
 
 **Q: What if an app doesn't have an icon?** 
 A: The tool will exit with an error code and display an error message.
