@@ -26,6 +26,8 @@ struct CLIArguments {
     var inputPath: String?
     var outputPath: String?
     var size: Int = 512
+    var sizeExplicitlySet: Bool = false  // Track if user explicitly set the size
+    var maxFileSize: Int? = nil  // Maximum file size in KB
     var force: Bool = false
     var help: Bool = false
     var version: Bool = false
@@ -60,6 +62,12 @@ func parseArguments() -> CLIArguments {
             i += 1
             if i < arguments.count, let size = Int(arguments[i]) {
                 args.size = size
+                args.sizeExplicitlySet = true
+            }
+        case "-m", "--max-file-size":
+            i += 1
+            if i < arguments.count, let maxSize = parseFileSize(arguments[i]) {
+                args.maxFileSize = maxSize
             }
         default:
             // Treat as input path if no input specified yet
@@ -71,6 +79,65 @@ func parseArguments() -> CLIArguments {
     }
     
     return args
+}
+
+func parseFileSize(_ input: String) -> Int? {
+    let trimmed = input.trimmingCharacters(in: .whitespaces).uppercased()
+    
+    // Extract numeric part and unit part
+    var numericString = ""
+    var unit = ""
+    
+    for char in trimmed {
+        if char.isNumber || char == "." {
+            numericString.append(char)
+        } else if char.isLetter {
+            unit.append(char)
+        }
+    }
+    
+    // Parse the numeric value
+    guard let value = Double(numericString), value > 0 else {
+        return nil
+    }
+    
+    // Convert to KB based on unit
+    let sizeInKB: Int
+    switch unit {
+    case "MB", "M":
+        sizeInKB = Int(value * 1024)
+    case "KB", "K", "":
+        // Default to KB if no unit specified
+        sizeInKB = Int(value)
+    default:
+        return nil
+    }
+    
+    return sizeInKB
+}
+
+func selectOptimalSize(for maxFileSizeKB: Int) -> Int {
+    // Select an appropriate icon size based on target file size
+    // These are rough estimates based on typical PNG compression
+    if maxFileSizeKB >= 2048 {  // >= 2MB
+        return 1024
+    } else if maxFileSizeKB >= 1024 {  // >= 1MB
+        return 512
+    } else if maxFileSizeKB >= 512 {  // >= 512KB
+        return 512
+    } else if maxFileSizeKB >= 256 {  // >= 256KB
+        return 256
+    } else if maxFileSizeKB >= 128 {  // >= 128KB
+        return 256
+    } else if maxFileSizeKB >= 64 {   // >= 64KB
+        return 128
+    } else if maxFileSizeKB >= 32 {   // >= 32KB
+        return 128
+    } else if maxFileSizeKB >= 16 {   // >= 16KB
+        return 64
+    } else {  // < 16KB
+        return 32
+    }
 }
 
 // MARK: - CLI Output
@@ -90,6 +157,9 @@ func printHelp() {
         -o, --output <path>     Output file path (default: <AppName>.png)
         -s, --size <pixels>     Icon size in pixels (default: 512)
                                 Common sizes: 16, 32, 64, 128, 256, 512, 1024
+        -m, --max-file-size <size>   Maximum file size (uses sips to optimize)
+                                Formats: 100KB, 100K, 2MB, 2M (case-insensitive)
+                                Example: -m 100KB or -m 2M
         -f, --force            Overwrite existing files without prompting
         -h, --help             Show this help message
         -v, --version          Show version information
@@ -100,6 +170,12 @@ func printHelp() {
         
         # Extract to specific location with custom size
         icongrabber -i /Applications/Safari.app -o ~/Desktop/Safari.png -s 256
+        
+        # Extract and optimize to be under 100KB
+        icongrabber /Applications/Safari.app -m 100KB
+        
+        # Extract and optimize to be under 2MB
+        icongrabber /Applications/Safari.app -m 2M
         
         # Overwrite existing file without prompting
         icongrabber /Applications/Safari.app -f
@@ -200,6 +276,106 @@ func saveIconAsPNG(_ icon: NSImage, to outputPath: String, size: Int) throws {
     try pngData.write(to: url)
 }
 
+func optimizeFileSize(_ filePath: String, maxSizeKB: Int) throws {
+    let fileURL = URL(fileURLWithPath: filePath)
+    
+    // Get current file size
+    let attributes = try FileManager.default.attributesOfItem(atPath: filePath)
+    guard let fileSize = attributes[.size] as? UInt64 else {
+        throw CLIError.exportFailed("Could not determine file size")
+    }
+    
+    let fileSizeKB = Int(fileSize / 1024)
+    
+    // If already under the limit, no optimization needed
+    if fileSizeKB <= maxSizeKB {
+        print("File size (\(fileSizeKB)KB) is already within limit (\(maxSizeKB)KB)")
+        return
+    }
+    
+    print("Optimizing file size from \(fileSizeKB)KB to meet \(maxSizeKB)KB limit...")
+    
+    // Create temporary file for optimization
+    let tempURL = fileURL.deletingLastPathComponent().appendingPathComponent(".\(fileURL.lastPathComponent).tmp")
+    
+    // Try different compression strategies
+    var quality = 90
+    var currentSizeKB = fileSizeKB
+    
+    while quality >= 10 && currentSizeKB > maxSizeKB {
+        // Use sips to convert to JPEG with compression, then back to PNG
+        // This reduces file size while maintaining reasonable quality
+        let jpegTemp = fileURL.deletingLastPathComponent().appendingPathComponent(".\(fileURL.lastPathComponent).jpg")
+        
+        // Convert to JPEG with quality setting
+        let convertProcess = Process()
+        convertProcess.executableURL = URL(fileURLWithPath: "/usr/bin/sips")
+        convertProcess.arguments = [
+            "-s", "format", "jpeg",
+            "-s", "formatOptions", "\(quality)",
+            filePath,
+            "--out", jpegTemp.path
+        ]
+        
+        let convertPipe = Pipe()
+        convertProcess.standardError = convertPipe
+        try convertProcess.run()
+        convertProcess.waitUntilExit()
+        
+        guard convertProcess.terminationStatus == 0 else {
+            throw CLIError.exportFailed("sips JPEG conversion failed")
+        }
+        
+        // Convert back to PNG
+        let pngProcess = Process()
+        pngProcess.executableURL = URL(fileURLWithPath: "/usr/bin/sips")
+        pngProcess.arguments = [
+            "-s", "format", "png",
+            jpegTemp.path,
+            "--out", tempURL.path
+        ]
+        
+        let pngPipe = Pipe()
+        pngProcess.standardError = pngPipe
+        try pngProcess.run()
+        pngProcess.waitUntilExit()
+        
+        // Clean up JPEG temp file
+        try? FileManager.default.removeItem(at: jpegTemp)
+        
+        guard pngProcess.terminationStatus == 0 else {
+            throw CLIError.exportFailed("sips PNG conversion failed")
+        }
+        
+        // Check new file size
+        let tempAttributes = try FileManager.default.attributesOfItem(atPath: tempURL.path)
+        guard let tempSize = tempAttributes[.size] as? UInt64 else {
+            throw CLIError.exportFailed("Could not determine optimized file size")
+        }
+        
+        currentSizeKB = Int(tempSize / 1024)
+        
+        // If we've met the target, replace original file
+        if currentSizeKB <= maxSizeKB {
+            try FileManager.default.removeItem(at: fileURL)
+            try FileManager.default.moveItem(at: tempURL, to: fileURL)
+            print("✓ Optimized to \(currentSizeKB)KB (quality: \(quality)%)")
+            return
+        }
+        
+        // Try lower quality
+        quality -= 10
+    }
+    
+    // Clean up temp file if it exists
+    try? FileManager.default.removeItem(at: tempURL)
+    
+    // If we couldn't meet the target, throw an error
+    if currentSizeKB > maxSizeKB {
+        throw CLIError.exportFailed("Could not reduce file size to \(maxSizeKB)KB (final size: \(currentSizeKB)KB). Consider using a smaller icon size with the -s option.")
+    }
+}
+
 func generateOutputPath(for inputPath: String) -> String {
     let url = URL(fileURLWithPath: inputPath)
     let appName = url.deletingPathExtension().lastPathComponent
@@ -248,10 +424,17 @@ func main() -> Int32 {
         return 2
     }
     
+    // Auto-select size based on max file size if user didn't specify size
+    var iconSize = args.size
+    if let maxSize = args.maxFileSize, !args.sizeExplicitlySet {
+        iconSize = selectOptimalSize(for: maxSize)
+        print("Auto-selecting \(iconSize)x\(iconSize) icon size for \(maxSize)KB target")
+    }
+    
     // Validate size
     let validSizes = [16, 32, 64, 128, 256, 512, 1024]
-    if !validSizes.contains(args.size) {
-        fputs("Warning: Size \(args.size) is not a standard icon size. Supported: \(validSizes.map(String.init).joined(separator: ", "))\n", stderr)
+    if !validSizes.contains(iconSize) {
+        fputs("Warning: Size \(iconSize) is not a standard icon size. Supported: \(validSizes.map(String.init).joined(separator: ", "))\n", stderr)
     }
     
     do {
@@ -261,7 +444,7 @@ func main() -> Int32 {
         
         // Extract icon
         print("Extracting icon from: \(resolvedInput)")
-        let icon = try extractIcon(from: resolvedInput, size: args.size)
+        let icon = try extractIcon(from: resolvedInput, size: iconSize)
         
         // Determine output path
         let outputPath: String
@@ -292,8 +475,13 @@ func main() -> Int32 {
         }
         
         // Save icon
-        print("Saving \(args.size)x\(args.size) icon to: \(outputPath)")
-        try saveIconAsPNG(icon, to: outputPath, size: args.size)
+        print("Saving \(iconSize)x\(iconSize) icon to: \(outputPath)")
+        try saveIconAsPNG(icon, to: outputPath, size: iconSize)
+        
+        // Optimize file size if requested
+        if let maxSize = args.maxFileSize {
+            try optimizeFileSize(outputPath, maxSizeKB: maxSize)
+        }
         
         print("✓ Icon extracted successfully!")
         return 0

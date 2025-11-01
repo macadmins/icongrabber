@@ -17,7 +17,10 @@ Input application path (alternative to positional argument)
 Output file path. If not specified, defaults to \fIAppName.png\fR in the current directory. If a directory path is provided, the filename will be auto-generated.
 .TP
 .BR \-s ", " \-\-size " \fIPIXELS\fR"
-Icon size in pixels (default: 512). Common sizes are 16, 32, 64, 128, 256, 512, and 1024.
+Icon size in pixels (default: 512). Common sizes are 16, 32, 64, 128, 256, 512, and 1024. If \-\-max-file-size is specified without \-\-size, an appropriate size will be automatically selected.
+.TP
+.BR \-m ", " \-\-max-file-size " \fISIZE\fR"
+Maximum file size for the output PNG. Uses sips to optimize the icon through iterative JPEG compression. Accepts formats like 100KB, 100K, 2MB, 2M (case-insensitive). If this option is used without specifying \-\-size, the tool will automatically select an appropriate icon size based on the target file size.
 .TP
 .BR \-f ", " \-\-force
 Overwrite existing files without prompting for confirmation.
@@ -54,6 +57,15 @@ Specify output location:
 Force overwrite without prompting:
 .B icongrabber /Applications/Safari.app \-f
 .TP
+Optimize to specific file size:
+.B icongrabber /Applications/Safari.app \-m 100KB
+.TP
+Optimize to 2MB with auto-selected size:
+.B icongrabber /Applications/Safari.app \-m 2M
+.TP
+Optimize with explicit size:
+.B icongrabber /Applications/Safari.app \-s 256 \-m 50KB \-o small.png
+.TP
 Extract with all options:
 .B icongrabber \-i /Applications/Xcode.app \-o xcode_icon.png \-s 1024 \-f
 .TP
@@ -67,6 +79,10 @@ done
 The extracted icons are the actual application icons as registered with macOS. The quality and availability of different sizes depends on the application's icon resources.
 
 If an output file already exists, icongrabber will prompt for confirmation before overwriting unless the \-\-force flag is used.
+
+When using \-\-max-file-size, the tool optimizes the PNG by converting to JPEG with varying quality levels (90% down to 10%), then converting back to PNG. If the target file size cannot be met, the operation will fail with exit code 3.
+
+If \-\-max-file-size is specified without \-\-size, the tool automatically selects an appropriate icon size: 1024px for ≥2MB, 512px for ≥1MB, 256px for ≥256KB, 128px for ≥64KB, 64px for ≥16KB, and 32px for smaller targets.
 
 macOS application icons are stored as raster images in PNG format. All output is in PNG format.
 
