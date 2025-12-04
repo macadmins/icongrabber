@@ -56,5 +56,5 @@ When preparing a release, move items from [Unreleased] to a new version section.
 - Faster icon extraction algorithm
 ```
 
-[Unreleased]: https://github.com/kitzy/icongrabber/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/kitzy/icongrabber/releases/tag/v1.0.0
+[Unreleased]: https://github.com/macadmins/icongrabber/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/macadmins/icongrabber/releases/tag/v1.0.0

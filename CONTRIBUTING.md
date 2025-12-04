@@ -17,7 +17,7 @@ Thank you for your interest in contributing to Icon Grabber!
 
 ```bash
 # Clone the repository
-git clone https://github.com/kitzy/icongrabber.git
+git clone https://github.com/macadmins/icongrabber.git
 cd icongrabber
 
 # Build the project

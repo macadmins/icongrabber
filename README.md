@@ -7,13 +7,13 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange.svg)](https://swift.org)
-[![CI Tests](https://github.com/kitzy/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/kitzy/icongrabber/actions)
+[![CI Tests](https://github.com/macadmins/icongrabber/workflows/CI%20Tests/badge.svg)](https://github.com/macadmins/icongrabber/actions)
 
 ---
 
-**Found this tool helpful?** Consider [sponsoring the project](https://github.com/sponsors/kitzy) to support ongoing development and maintenance. Your support helps keep Icon Grabber free and open source for everyone!
+**Found this tool helpful?** Consider [sponsoring the project](https://github.com/sponsors/macadmins) to support ongoing development and maintenance. Your support helps keep Icon Grabber free and open source for everyone!
 
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/kitzy?logo=github&color=ea4aaa&style=for-the-badge)](https://github.com/sponsors/kitzy)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/macadmins?logo=github&color=ea4aaa&style=for-the-badge)](https://github.com/sponsors/macadmins)
 
 </div>
 
@@ -34,14 +34,14 @@
 
 ### Download Release (Recommended)
 
-Download the latest signed and notarized installer from [Releases](https://github.com/kitzy/icongrabber/releases):
+Download the latest installer from [Releases](https://github.com/macadmins/icongrabber/releases):
 
 ```bash
 # Download the latest PKG installer
-curl -LO $(curl -s https://api.github.com/repos/kitzy/icongrabber/releases/latest | grep "browser_download_url.*\.pkg" | cut -d '"' -f 4)
+curl -LO $(curl -s https://api.github.com/repos/macadmins/icongrabber/releases/latest | grep "browser_download_url.*\.pkg" | cut -d '"' -f 4)
 
 # Or if you know the latest version number, use:
-# curl -LO https://github.com/kitzy/icongrabber/releases/latest/download/icongrabber-VERSION.pkg
+# curl -LO https://github.com/macadmins/icongrabber/releases/latest/download/icongrabber-VERSION.pkg
 
 # Install
 sudo installer -pkg icongrabber-*.pkg -target /
@@ -211,7 +211,7 @@ icongrabber /Applications/Safari.app -o my-custom-name.png
 
 ```bash
 # Clone the repository
-git clone https://github.com/kitzy/icongrabber.git
+git clone https://github.com/macadmins/icongrabber.git
 cd icongrabber
 
 # Build
@@ -306,14 +306,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The workflow automatically builds, signs, notarizes, and publishes the release.
-
-**First-time setup:**
-```bash
-./scripts/setup_signing.sh
-```
-
-This configures code signing and notarization (requires Apple Developer account).
+The workflow automatically builds and publishes the release.
 
 ## License
 
