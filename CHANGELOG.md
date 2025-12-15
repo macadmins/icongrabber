@@ -5,22 +5,28 @@ All notable changes to Icon Grabber will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - YYYY-MM-DD
+## [Unreleased]
+
+### Added
+- Automated build process with code signing and notarization
+- GitHub Actions workflows for CI and releases
+
+---
+
+## [1.0.0] - 2024-12-15
 
 ### Added
 - Initial release
 - Extract icons from macOS applications
 - Support for custom sizes (16x16 to 1024x1024)
 - PNG output format
-- Command-line interface
+- File size optimization using sips compression
+- Command-line interface with intuitive options
 - Man page documentation
 - Batch processing examples
-
-### Features
-- Fast, native Swift implementation
-- No external dependencies
-- High-quality icon extraction
-- Scriptable and automatable
+- Native Swift implementation with no dependencies
+- High-quality icon extraction preserving original quality
+- Scriptable and automatable for workflows
 
 ---
 

@@ -292,22 +292,6 @@ Contributions are welcome! Feel free to:
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## For Maintainers
-
-### Creating Releases
-
-See the complete [Release Guide](.github/RELEASE_GUIDE.md) for detailed instructions.
-
-**Quick release:**
-```bash
-# 1. Update CHANGELOG.md
-# 2. Create and push tag
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The workflow automatically builds and publishes the release.
-
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
