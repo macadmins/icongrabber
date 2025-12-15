@@ -84,6 +84,69 @@ Feature requests are welcome! Please:
 
 Feel free to open an issue for any questions about contributing!
 
+## For Maintainers
+
+This section is for maintainers who have write access to the repository.
+
+### Creating a Release
+
+1. **Update CHANGELOG.md** with release notes for the new version
+2. **Commit the changes:**
+   ```bash
+   git add CHANGELOG.md
+   git commit -m "Update changelog for v1.0.0"
+   git push origin main
+   ```
+
+3. **Create and push a tag:**
+   ```bash
+   git tag -a v1.0.0 -m "Release version 1.0.0"
+   git push origin v1.0.0
+   ```
+
+4. **Monitor the workflow** at https://github.com/macadmins/icongrabber/actions
+
+The GitHub Actions workflow will automatically:
+1. Build the optimized binary
+2. Sign the binary with hardened runtime
+3. Create a signed installer package
+4. Submit to Apple for notarization (~10 minutes)
+5. Staple the notarization ticket
+6. Create a GitHub release with all artifacts
+7. Extract changelog entries and include them in release notes
+
+### Manual Release (Alternative)
+
+You can also trigger a release manually:
+
+1. Go to **Actions** → **Release** workflow
+2. Click **"Run workflow"**
+3. Enter the version number (e.g., `1.0.0`)
+4. Click **"Run workflow"**
+
+### Release Documentation
+
+- [Workflow Documentation](.github/workflows/README.md) - How the build process works
+- [Secrets Management](.github/SECRETS.md) - Managing certificates and credentials
+- [Setup Summary](.github/SETUP_SUMMARY.md) - Overview of the automated build setup
+
+### Verifying Releases
+
+After a release is created, verify the artifacts:
+
+```bash
+# Download and verify signature
+curl -LO https://github.com/macadmins/icongrabber/releases/download/v1.0.0/icongrabber-1.0.0.pkg
+pkgutil --check-signature icongrabber-1.0.0.pkg
+
+# Verify notarization
+spctl --assess --verbose --type install icongrabber-1.0.0.pkg
+
+# Verify checksums
+curl -LO https://github.com/macadmins/icongrabber/releases/download/v1.0.0/checksums.txt
+shasum -a 256 -c checksums.txt
+```
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the Apache License 2.0.

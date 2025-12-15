@@ -14,16 +14,34 @@ on:
 env:
   APP_NAME: icongrabber
   BUNDLE_ID: com.macadmins.icongrabber
+  NOTARY_APP_PASSWORD: ${{ secrets.NOTARY_APP_PASSWORD_MAOS }}
 
 jobs:
   build-and-release:
-    runs-on: macos-latest
+    runs-on: macos-14
     permissions:
       contents: write
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Install Apple Application certificates
+      uses: apple-actions/import-codesign-certs@v3
+      with:
+        keychain-password: ${{ github.run_id }}
+        p12-file-base64: ${{ secrets.APP_CERTIFICATES_P12_MAOS }}
+        p12-password: ${{ secrets.APP_CERTIFICATES_P12_PASSWORD_MAOS }}
+    
+    - name: Install Apple Installer certificates
+      uses: apple-actions/import-codesign-certs@v3
+      with:
+        create-keychain: false
+        keychain-password: ${{ github.run_id }}
+        p12-file-base64: ${{ secrets.PKG_CERTIFICATES_P12_MAOS }}
+        p12-password: ${{ secrets.PKG_CERTIFICATES_P12_PASSWORD_MAOS }}
     
     - name: Set version
       id: version
@@ -55,7 +73,15 @@ jobs:
         echo "Building optimized release binary..."
         mkdir -p bin
         swiftc -O -o bin/${{ env.APP_NAME }} icongrabber-cli/main.swift -framework AppKit
-        strip bin/${{ env.APP_NAME }}
+        
+        echo "Signing binary..."
+        codesign --force --options runtime \
+          --sign "Developer ID Application: Mac Admins Open Source (T4SK8ZXCXG)" \
+          --timestamp \
+          bin/${{ env.APP_NAME }}
+        
+        echo "Verifying signature..."
+        codesign -vvv --deep --strict bin/${{ env.APP_NAME }}
         
         echo "Binary info:"
         ls -lh bin/${{ env.APP_NAME }}
@@ -140,11 +166,16 @@ jobs:
         </installer-gui-script>
         EOF
         
-        # Build the product archive
+        # Build the product archive with signing
         productbuild \
           --distribution distribution.xml \
           --package-path . \
+          --sign "Developer ID Installer: Mac Admins Open Source (T4SK8ZXCXG)" \
+          --timestamp \
           ${{ env.APP_NAME }}-$VERSION.pkg
+        
+        # Verify package signature
+        pkgutil --check-signature ${{ env.APP_NAME }}-$VERSION.pkg
         
         ls -lh ${{ env.APP_NAME }}-$VERSION.pkg
     
@@ -163,6 +194,29 @@ jobs:
         echo "Created tarball:"
         ls -lh ${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz
     
+    - name: Notarize package
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        echo "Setting up notarization credentials..."
+        xcrun notarytool store-credentials "icongrabber-notary" \
+          --apple-id "opensource@macadmins.io" \
+          --team-id "T4SK8ZXCXG" \
+          --password "$NOTARY_APP_PASSWORD"
+        
+        echo "Submitting package for notarization..."
+        xcrun notarytool submit "${{ env.APP_NAME }}-$VERSION.pkg" \
+          --keychain-profile "icongrabber-notary" \
+          --wait
+        
+        echo "Stapling notarization ticket..."
+        xcrun stapler staple "${{ env.APP_NAME }}-$VERSION.pkg"
+        
+        echo "Verifying stapled package..."
+        xcrun stapler validate "${{ env.APP_NAME }}-$VERSION.pkg"
+        
+        echo "Package successfully signed, notarized, and stapled!"
+    
     - name: Generate checksums
       run: |
         VERSION="${{ steps.version.outputs.VERSION }}"
@@ -173,6 +227,14 @@ jobs:
         echo "Checksums:"
         cat checksums.txt
     
+    - name: Get Changelog Entry
+      id: changelog_reader
+      uses: mindsers/changelog-reader-action@v2
+      with:
+        validation_depth: 100
+        version: ${{ steps.version.outputs.VERSION }}
+        path: ./CHANGELOG.md
+    
     - name: Generate release notes
       id: release_notes
       run: |
@@ -181,14 +243,21 @@ jobs:
         cat > release_notes.md << EOF
         ## Icon Grabber v$VERSION
         
+        ### 🎉 Release Notes
+        
+        This release has been automatically built, signed, and notarized by GitHub Actions.
+        
+        **Security**: Both the binary and installer package are signed with a valid Developer ID certificate and notarized by Apple. The package is stapled for offline verification.
+        
         ### Installation
         
         #### Option 1: Install via PKG (Recommended)
         Download \`${{ env.APP_NAME }}-$VERSION.pkg\` and double-click to install.
         
         The PKG installer will:
-        - Install the binary to \`/usr/local/bin/icongrabber\`
+        - Install the signed binary to \`/usr/local/bin/icongrabber\`
         - Install the man page to \`/usr/local/share/man/man1/\`
+        - The package is signed, notarized, and stapled
         #### Option 2: Manual Installation
         Download \`${{ env.APP_NAME }}-$VERSION-macos-binary.tar.gz\`:
         
@@ -213,7 +282,7 @@ jobs:
         
         ### What's Changed
         
-        See [CHANGELOG.md](https://github.com/macadmins/icongrabber/blob/main/CHANGELOG.md) for details.
+        ${{ steps.changelog_reader.outputs.changes }}
         
         ---
         

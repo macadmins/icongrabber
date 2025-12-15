@@ -1,6 +1,11 @@
 name: CI Tests
 
 on:
+  push:
+    branches: [ main, development ]
+    paths-ignore:
+      - '**.md'
+      - 'examples/**'
   pull_request:
     branches: [ main, development ]
   workflow_dispatch:
