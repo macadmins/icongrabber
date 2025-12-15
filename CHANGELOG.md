@@ -8,8 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Automated build process with code signing and notarization
-- GitHub Actions workflows for CI and releases
 
 ---
 
@@ -27,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Native Swift implementation with no dependencies
 - High-quality icon extraction preserving original quality
 - Scriptable and automatable for workflows
+- Automated build process with code signing and notarization
+- GitHub Actions workflows for CI and releases
 
 ---
 
@@ -42,25 +42,6 @@ When preparing a release, move items from [Unreleased] to a new version section.
 - **Removed** for now removed features
 - **Fixed** for any bug fixes
 - **Security** for vulnerability fixes
-
-### Example Entry
-
-```markdown
-## [1.1.0] - 2024-01-15
-
-### Added
-- Support for ICNS file output format
-- `--format` flag to choose output format (png or icns)
-- Progress indicator for batch operations
-
-### Fixed
-- Crash when processing apps without icons
-- Incorrect aspect ratio for non-square icons
-
-### Changed
-- Improved error messages
-- Faster icon extraction algorithm
-```
 
 [Unreleased]: https://github.com/macadmins/icongrabber/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/macadmins/icongrabber/releases/tag/v1.0.0
