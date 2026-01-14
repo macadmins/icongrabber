@@ -234,10 +234,6 @@ func extractIcon(from appPath: String, size: Int) throws -> NSImage {
     // Get the icon for the application
     let icon = NSWorkspace.shared.icon(forFile: url.path)
     
-    // Set the size
-    let iconSize = NSSize(width: size, height: size)
-    icon.size = iconSize
-    
     return icon
 }
 
@@ -245,25 +241,39 @@ func saveIconAsPNG(_ icon: NSImage, to outputPath: String, size: Int) throws {
     let url = URL(fileURLWithPath: outputPath)
     let iconSize = NSSize(width: size, height: size)
     
-    // Create a bitmap representation
-    guard let tiffData = icon.tiffRepresentation,
-          let _ = NSBitmapImageRep(data: tiffData) else {
+    // Create a bitmap representation with exact pixel dimensions
+    guard let bitmapRep = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: size,
+        pixelsHigh: size,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ) else {
         throw CLIError.exportFailed("Could not create bitmap representation")
     }
     
-    // Resize to exact dimensions
-    let resizedImage = NSImage(size: iconSize)
-    resizedImage.lockFocus()
+    // Draw the icon into the bitmap context at exact pixel dimensions
+    NSGraphicsContext.saveGraphicsState()
+    guard let context = NSGraphicsContext(bitmapImageRep: bitmapRep) else {
+        throw CLIError.exportFailed("Could not create graphics context")
+    }
+    NSGraphicsContext.current = context
+    
+    // Draw icon scaled to exact size
     icon.draw(in: NSRect(origin: .zero, size: iconSize),
-             from: NSRect(origin: .zero, size: icon.size),
+             from: NSRect.zero,
              operation: .copy,
              fraction: 1.0)
-    resizedImage.unlockFocus()
+    
+    NSGraphicsContext.restoreGraphicsState()
     
     // Convert to PNG
-    guard let resizedTiff = resizedImage.tiffRepresentation,
-          let resizedBitmap = NSBitmapImageRep(data: resizedTiff),
-          let pngData = resizedBitmap.representation(using: .png, properties: [:]) else {
+    guard let pngData = bitmapRep.representation(using: .png, properties: [:]) else {
         throw CLIError.exportFailed("Could not create PNG data")
     }
     
