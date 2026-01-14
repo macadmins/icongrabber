@@ -80,6 +80,25 @@ assert_exit_code() {
     fi
 }
 
+assert_image_dimensions() {
+    local file=$1
+    local expected_width=$2
+    local expected_height=$3
+    if [ -f "$file" ]; then
+        # Use sips to get actual pixel dimensions
+        local width=$(sips -g pixelWidth "$file" 2>/dev/null | grep pixelWidth | awk '{print $2}')
+        local height=$(sips -g pixelHeight "$file" 2>/dev/null | grep pixelHeight | awk '{print $2}')
+        
+        if [ "$width" = "$expected_width" ] && [ "$height" = "$expected_height" ]; then
+            pass_test
+        else
+            fail_test "Expected ${expected_width}x${expected_height}, got ${width}x${height}"
+        fi
+    else
+        fail_test "File $file does not exist"
+    fi
+}
+
 assert_file_size_under() {
     local file=$1
     local max_kb=$2
@@ -145,15 +164,27 @@ print_test 2 "Custom size extraction (256x256)"
 $CLI "$TEST_APP" -s 256 -o test_256.png -f
 assert_file_exists "test_256.png"
 
+# Test 2a: Verify 256x256 dimensions
+print_test "2a" "Verify 256x256 pixel dimensions"
+assert_image_dimensions "test_256.png" 256 256
+
 # Test 3: Small size (64x64)
 print_test 3 "Small icon extraction (64x64)"
 $CLI "$TEST_APP" -s 64 -o test_64.png -f
 assert_file_exists "test_64.png"
 
+# Test 3a: Verify 64x64 dimensions
+print_test "3a" "Verify 64x64 pixel dimensions"
+assert_image_dimensions "test_64.png" 64 64
+
 # Test 4: Large size (1024x1024)
 print_test 4 "Large icon extraction (1024x1024)"
 $CLI "$TEST_APP" -s 1024 -o test_1024.png -f
 assert_file_exists "test_1024.png"
+
+# Test 4a: Verify 1024x1024 dimensions
+print_test "4a" "Verify 1024x1024 pixel dimensions"
+assert_image_dimensions "test_1024.png" 1024 1024
 
 # Test 5: File size validation (should be reasonable)
 print_test 5 "Output file size validation"
@@ -230,6 +261,22 @@ if [ "$all_exist" = true ]; then
     pass_test
 else
     fail_test "Some size extractions failed"
+fi
+
+# Test 13a: Verify all standard size dimensions are correct
+print_test "13a" "Verify all standard sizes have correct dimensions"
+all_correct=true
+for size in "${sizes[@]}"; do
+    width=$(sips -g pixelWidth "test_${size}.png" 2>/dev/null | grep pixelWidth | awk '{print $2}')
+    height=$(sips -g pixelHeight "test_${size}.png" 2>/dev/null | grep pixelHeight | awk '{print $2}')
+    if [ "$width" != "$size" ] || [ "$height" != "$size" ]; then
+        fail_test "Size ${size}: Expected ${size}x${size}, got ${width}x${height}"
+        all_correct=false
+        break
+    fi
+done
+if [ "$all_correct" = true ]; then
+    pass_test
 fi
 
 # Test 14: Force flag to overwrite without prompt

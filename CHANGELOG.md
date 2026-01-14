@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Fixed
+- Fixed icon sizing bug where output images were created at 2× the requested dimensions (e.g., 512px request would produce 1024px output) ([#3](https://github.com/macadmins/icongrabber/issues/3))
+- Corrected bitmap creation to use explicit pixel dimensions instead of relying on NSImage.size which was affected by Retina scaling
+
+### Changed
+- Improved test suite with pixel dimension verification using `sips` to ensure icons are created at exact requested sizes
+- Added 4 new dimension verification tests covering standard icon sizes (64×64, 256×256, 512×512, 1024×1024)
 
 ---
 
