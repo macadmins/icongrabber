@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.0.1] - 2026-01-14
+
 ### Fixed
 - Fixed icon sizing bug where output images were created at 2× the requested dimensions (e.g., 512px request would produce 1024px output) ([#3](https://github.com/macadmins/icongrabber/issues/3))
 - Corrected bitmap creation to use explicit pixel dimensions instead of relying on NSImage.size which was affected by Retina scaling
@@ -49,5 +53,6 @@ When preparing a release, move items from [Unreleased] to a new version section.
 - **Fixed** for any bug fixes
 - **Security** for vulnerability fixes
 
-[Unreleased]: https://github.com/macadmins/icongrabber/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/macadmins/icongrabber/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/macadmins/icongrabber/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/macadmins/icongrabber/releases/tag/v1.0.0
